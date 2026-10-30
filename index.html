@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestão de OS · Controle Agrícola</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <header class="topo">
+        <div class="topo-marca">
+            <strong>GESTÃO A VISTA</strong>
+            <span>Ordem de Serviço</span>
+        </div>
+
+        <input type="search" id="busca" class="busca" placeholder="Buscar OS, fazenda ou líder…"
+            aria-label="Buscar OS, fazenda ou líder">
+
+        <div class="topo-direita">
+            <div class="campo-inline">
+                Ver OS de
+                <details class="multi" id="filtro-analista">
+                    <summary class="multi-botao"><span id="filtro-analista-texto">Todos os analistas</span></summary>
+                    <div class="multi-lista" id="filtro-analista-lista"></div>
+                </details>
+            </div>
+
+            <!-- NOVO: quem está usando o painel (vai para o log) -->
+            <button type="button" id="btn-eu-sou" class="botao-pilula">
+                Usuário: <strong id="eu-sou-nome">—</strong>
+            </button>
+
+            <button type="button" id="btn-sino" class="botao-icone" aria-label="Notificações">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" aria-hidden="true">
+                    <path d="M6 8a6 6 0 1112 0c0 7 3 9 3 9H3s3-2 3-9"></path>
+                    <path d="M10.3 21a1.9 1.9 0 003.4 0"></path>
+                </svg>
+            </button>
+
+            <!-- NOVO: mostra se os dados estão em dia -->
+            <span id="status-atualizacao" class="status">Carregando…</span>
+        </div>
+    </header>
+
+    <main class="pagina">
+        <nav class="visoes" aria-label="O que ver">
+            <button type="button" class="visao-botao ativo" data-visao="solicitacoes">Solicitações</button>
+            <button type="button" class="visao-botao" data-visao="os">Ordens de Serviço</button>
+        </nav>
+
+        <div class="visao" id="visao-solicitacoes">
+            <div class="barra-filtros">
+                <nav class="abas" id="abas" aria-label="Situação">
+                    <button type="button" class="aba ativa" data-aba="afazer">Pendente<span class="contador"
+                            id="cont-afazer">0</span></button>
+                    <button type="button" class="aba" data-aba="lancadas">Lançadas <span class="contador"
+                            id="cont-lancadas">0</span></button>
+                    <button type="button" class="aba" data-aba="rejeitadas">Rejeitadas <span class="contador"
+                            id="cont-rejeitadas">0</span></button>
+                    <button type="button" class="aba" data-aba="todas">Todas <span class="contador"
+                            id="cont-todas">0</span></button>
+                </nav>
+
+                <div class="filtros">
+                    <span class="filtros-rotulo">Tipo</span>
+                    <button type="button" class="chip" data-tipo="LANCAMENTO" aria-pressed="true">Abertura</button>
+                    <button type="button" class="chip" data-tipo="APONTAMENTO" aria-pressed="true">Apontamento</button>
+                    <button type="button" class="chip" data-tipo="ENCERRAMENTO"
+                        aria-pressed="true">Encerramento</button>
+                    <select id="filtro-periodo" aria-label="Período">
+                        <option value="30">Últimos 30 dias</option>
+                        <option value="7">Últimos 7 dias</option>
+                        <option value="0">Tudo</option>
+                    </select>
+                </div>
+            </div>
+            <div class="colunas">
+                <section class="cartao fila" aria-label="Fila de trabalho">
+                    <div class="cartao-cabecalho">
+                        <strong id="fila-titulo">A fazer</strong>
+                        <button type="button" id="fila-ordem" class="botao-ordem" title="Trocar a ordem">mais antigo
+                            primeiro</button>
+                    </div>
+                    <div id="fila-lista" class="fila-lista"></div>
+                </section>
+
+                <section class="detalhe" id="detalhe" aria-label="Detalhe da solicitação">
+                    <p class="vazio">Escolha uma solicitação na lista para ver os detalhes.</p>
+                </section>
+
+                <aside class="lateral" id="lateral" aria-label="Decisão">
+                    <!-- Decisão: só aparece para OS em análise -->
+                    <section class="cartao bloco" id="decisao" hidden>
+                        <h2 class="decisao-titulo">Decisão</h2>
+
+                        <div class="decisao-abas">
+                            <button type="button" class="decisao-aba ativa" data-modo="lancar">Lançar</button>
+                            <button type="button" class="decisao-aba" data-modo="rejeitar">Rejeitar</button>
+                        </div>
+
+                        <form id="form-lancar" class="decisao-form">
+                            <label class="arquivo">
+                                <input type="file" id="lancar-pdf" accept="application/pdf">
+                                <strong id="lancar-pdf-nome">Anexar PDF da O.S</strong>
+                                <span id="lancar-pdf-info">opcional · clique ou arraste aqui</span>
+                            </label>
+
+                            <label class="campo-form">
+                                Número da OS
+                                <input type="text" id="lancar-numero" inputmode="numeric" autocomplete="off">
+                            </label>
+                            <p class="dica" id="lancar-dica"></p>
+                            <p class="alerta" id="lancar-alerta"></p>
+
+                            <button type="submit" class="botao-principal" id="lancar-botao">Lançar OS</button>
+                        </form>
+
+                        <form id="form-rejeitar" class="decisao-form" hidden>
+                            <label class="campo-form">
+                                Motivo da rejeição
+                                <textarea id="rejeitar-detalhe" rows="4"
+                                    placeholder="Explique ao líder o que precisa ser corrigido…"></textarea>
+                            </label>
+
+                            <button type="submit" class="botao-perigo" id="rejeitar-botao">Rejeitar</button>
+                        </form>
+
+                        <p class="decisao-aviso" id="decisao-aviso" role="status"></p>
+                    </section>
+
+                    <!-- Situação: para OS já lançada ou rejeitada -->
+                    <section class="cartao bloco" id="situacao" hidden>
+                        <h2 class="decisao-titulo" id="situacao-titulo"></h2>
+                        <p class="situacao-texto" id="situacao-texto"></p>
+                    </section>
+
+                    <!-- Histórico: quem fez o quê, e quando -->
+                    <section class="cartao bloco" id="historico" hidden>
+                        <h2 class="decisao-titulo">Histórico</h2>
+                        <ol class="linha-do-tempo" id="historico-lista"></ol>
+                    </section>
+                </aside>
+            </div>
+        </div>
+
+        <div class="visao" id="visao-os" hidden>
+            <div class="barra-filtros">
+                <nav class="abas" id="abas-os" aria-label="Situação da OS">
+                    <button type="button" class="aba ativa" data-aba="abertas">Abertas <span class="contador"
+                            id="cont-os-abertas">0</span></button>
+                    <button type="button" class="aba" data-aba="encerradas">Encerradas <span class="contador"
+                            id="cont-os-encerradas">0</span></button>
+                    <button type="button" class="aba" data-aba="todas">Todas <span class="contador"
+                            id="cont-os-todas">0</span></button>
+                </nav>
+            </div>
+            <div class="colunas">
+                <section class="cartao fila" aria-label="Lista de Ordens de Serviço">
+                    <div class="cartao-cabecalho">
+                        <strong>Ordens de Serviço</strong>
+                        <button type="button" id="os-ordem" class="botao-ordem" title="Trocar a ordem">mais antiga
+                            primeiro</button>
+                    </div>
+                    <div id="os-lista" class="fila-lista"></div>
+                </section>
+                <section class="detalhe" id="os-ficha" aria-label="Ficha da OS">
+                    <p class="vazio">Escolha uma OS na lista para ver o andamento.</p>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <dialog id="dialogo-eu-sou" class="dialogo">
+        <h2 class="dialogo-titulo">Quem está usando este computador?</h2>
+        <p class="dica">Fica guardado neste navegador. Para trocar depois, clique em "Usuário" no topo.</p>
+        <div class="lista-eu-sou" id="lista-eu-sou"></div>
+    </dialog>
+
+    <dialog id="dialogo-editar" class="dialogo dialogo-largo">
+        <h2 class="dialogo-titulo">Editar solicitação</h2>
+        <p class="dica" id="editar-subtitulo"></p>
+        <p class="dica" id="editar-carregando">Carregando listas…</p>
+        <datalist id="lista-fazendas"></datalist>
+        <datalist id="lista-equipamentos"></datalist>
+        <datalist id="lista-insumos"></datalist>
+
+        <form id="form-editar" class="form-editar" hidden>
+            <label class="campo-form inteiro">Fazenda
+                <input name="fazenda" list="lista-fazendas" autocomplete="off">
+            </label>
+
+            <fieldset class="grupo-edicao inteiro">
+                <legend>Talhões</legend>
+                <div class="linhas-edicao" id="editar-talhoes"></div>
+                <div class="adicionar">
+                    <input id="editar-novo-talhao" placeholder="Adicionar talhões: 1-4, 8" autocomplete="off">
+                    <button type="button" class="botao-secundario" id="editar-add-talhao">Adicionar</button>
+                </div>
+                <p class="alerta" id="editar-talhoes-aviso"></p>
+            </fieldset>
+            <label class="campo-form">Centro de custo
+                <select name="centro_custo" id="editar-cc"></select>
+            </label>
+            <label class="campo-form">Operação
+                <select name="operacao" id="editar-operacao"></select>
+            </label>
+
+            <label class="campo-form">Data início
+                <input type="date" name="data_prevista_inicio">
+            </label>
+            <label class="campo-form">Data fim
+                <input type="date" name="data_prevista_fim">
+            </label>
+
+            <label class="campo-form">Área total (ha) · soma dos talhões
+                <input type="number" name="area_total" readonly>
+            </label>
+            <label class="campo-form">PEA
+                <input name="pea">
+            </label>
+
+            <label class="campo-form">Programação
+                <select name="programacao">
+                    <option value="SIM">SIM</option>
+                    <option value="NÃO">NÃO</option>
+                </select>
+            </label>
+            <label class="campo-form" id="campo-carreador">Justificativa (sem programação)
+                <input name="carreador">
+            </label>
+
+            <fieldset class="grupo-edicao inteiro">
+                <legend>Equipamentos</legend>
+                <div class="linhas-edicao" id="editar-equipamentos"></div>
+                <div class="adicionar">
+                    <input id="editar-novo-equipamento" list="lista-equipamentos" placeholder="Digite para buscar…"
+                        autocomplete="off">
+                    <button type="button" class="botao-secundario" id="editar-add-equipamento">Adicionar</button>
+                </div>
+                <p class="alerta" id="editar-equipamentos-aviso"></p>
+            </fieldset>
+
+            <fieldset class="grupo-edicao inteiro">
+                <legend>Insumos</legend>
+                <div class="linha-insumo cabecalho-insumos">
+                    <span>Código</span><span>Produto</span><span>UN</span><span>Dose/ha</span><span>Total</span><span></span>
+                </div>
+                <div class="linhas-edicao" id="editar-insumos"></div>
+                <button type="button" class="botao-secundario botao-pequeno" id="editar-add-insumo">+ Insumo</button>
+            </fieldset>
+
+            <label class="campo-form inteiro">Observação
+                <textarea name="observacao" rows="3"></textarea>
+            </label>
+
+            <p class="alerta inteiro" id="editar-erro"></p>
+
+            <div class="dialogo-botoes inteiro">
+                <button type="button" class="botao-secundario" id="editar-cancelar">Cancelar</button>
+                <button type="submit" class="botao-principal" id="editar-salvar">Salvar alterações</button>
+            </div>
+        </form>
+    </dialog>
+    <div id="carregando" class="carregando" role="status" hidden>
+        <span class="carregando-roda" aria-hidden="true"></span>
+        <span>Atualizando as solicitações…</span>
+    </div>
+    <div id="aviso" class="aviso" role="status" hidden></div>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-messaging-compat.js"></script>
+    <script type="module" src="js/main.js"></script>
+</body>
+
+</html>
