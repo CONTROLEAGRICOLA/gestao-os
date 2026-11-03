@@ -19,13 +19,13 @@ async function pedir(action, parametros = {}, segundos = 20) {
 
 // Só a versão do banco (resposta pequena, para saber se algo mudou)
 export async function buscarVersao() {
-    const json = await pedir('buscar_todas_os', {}, 60);
+    const json = await pedir('versao');
     return json.versao;
 }
 
-//todas OS da planilha
+// Todas as OS da planilha
 export async function buscarTodasOS() {
-    const json = await pedir('buscar_todas_os');
+    const json = await pedir('buscar_todas_os', {}, 60);
     const lista = json.dados;
 
     // Apontamento e encerramento guardam no os_origem o codigoTemp da OS mãe.
@@ -108,4 +108,18 @@ export function registrarPainel(token) {
         token,
         aparelho: 'Painel · ' + navigator.userAgent.slice(0, 120)
     });
+}
+
+// ---------- Relatórios dos líderes ----------
+
+// Quem está na aba de login (crachá e nome), para escolher a quem mandar
+export async function buscarLideres() {
+    const json = await pedir('buscar_lideres');
+    return json.dados;
+}
+
+// Manda um PDF para o líder (o servidor guarda no Drive e avisa no celular dele)
+export async function enviarRelatorio(cracha, arquivo, analista) {
+    const base64 = await lerBase64(arquivo);
+    return enviar({ action: 'enviar_relatorio', cracha, arquivo: arquivo.name, base64, analista }, 120);
 }
