@@ -1507,7 +1507,7 @@ textarea {
 }
 
 /* ===================== DETALHES DO APONTAMENTO (dentro da ficha da OS) ===================== */
-.apontamento-detalhes > summary {
+.apontamento-detalhes>summary {
     display: inline-flex;
     align-items: center;
     gap: 4px;
@@ -1517,12 +1517,12 @@ textarea {
     cursor: pointer;
 }
 
-.apontamento-detalhes > summary::after {
+.apontamento-detalhes>summary::after {
     content: '▸';
     transition: transform 0.15s;
 }
 
-.apontamento-detalhes[open] > summary::after {
+.apontamento-detalhes[open]>summary::after {
     transform: rotate(90deg);
 }
 
@@ -1554,7 +1554,8 @@ textarea {
 .fila-lista,
 .detalhe,
 .lateral {
-    overscroll-behavior: contain;   /* chegou no fim da coluna: NÃO passa a rolar a página */
+    overscroll-behavior: contain;
+    /* chegou no fim da coluna: NÃO passa a rolar a página */
 }
 
 /* Tela larga (as colunas cabem lado a lado): a página ocupa exatamente a tela e não rola.
@@ -1596,8 +1597,145 @@ textarea {
     }
 
     /* Os cartões dentro das colunas não podem ser espremidos: a coluna rola, eles não encolhem */
-    .detalhe > *,
-    .lateral > * {
+    .detalhe>*,
+    .lateral>* {
         flex-shrink: 0;
+    }
+}
+
+/* ===================== RELATÓRIOS DOS LÍDERES ===================== */
+.relatorios-arquivo {
+    margin-top: 16px;
+}
+
+.relatorios-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-height: 50vh;
+    margin: 12px 0;
+    overflow-y: auto;
+}
+
+.relatorio-linha {
+    display: grid;
+    grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) 110px 28px;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    background: var(--fundo);
+    border-radius: 8px;
+    font-size: 13px;
+}
+
+.relatorio-arquivo {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.relatorio-lider {
+    min-width: 0;
+    padding: 6px 8px;
+    background: var(--superficie);
+    border: 1px solid var(--borda-forte);
+    border-radius: 6px;
+    font-size: 13px;
+}
+
+.relatorio-status {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--texto-suave);
+}
+
+.relatorio-status[data-status="pronto"] {
+    color: var(--verde);
+}
+
+.relatorio-status[data-status="sem-lider"] {
+    color: var(--ambar);
+}
+
+.relatorio-status[data-status="enviando"] {
+    color: var(--azul);
+}
+
+.relatorio-status[data-status="enviado"] {
+    color: var(--verde);
+}
+
+.relatorio-status[data-status="erro"] {
+    color: var(--vermelho);
+}
+
+.relatorio-linha .botao-remover {
+    margin-left: 0;
+}
+
+.botao-enviar-relatorios {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* ===================== BOTÃO FLUTUANTE (relatórios) ===================== */
+.botao-flutuante {
+    position: fixed;
+    right: 24px;
+    bottom: 24px;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    height: 52px;
+    padding: 0 16px;
+    background: var(--verde);
+    color: #FFFFFF;
+    border: 0;
+    border-radius: 999px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+    opacity: 0.85;
+    cursor: pointer;
+    transition: opacity 0.2s, box-shadow 0.2s;
+}
+
+.botao-flutuante svg {
+    flex-shrink: 0;
+}
+
+.botao-flutuante-texto {
+    max-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    opacity: 0;
+    font-size: 14px;
+    font-weight: 600;
+    transition: max-width 0.25s ease, margin-left 0.25s ease, opacity 0.2s ease;
+}
+
+.botao-flutuante:hover,
+.botao-flutuante:focus-visible {
+    opacity: 1;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+
+.botao-flutuante:hover .botao-flutuante-texto,
+.botao-flutuante:focus-visible .botao-flutuante-texto {
+    max-width: 160px;
+    margin-left: 10px;
+    opacity: 1;
+}
+
+/* O aviso de "enviado" sobe para não ficar embaixo do botão */
+.aviso {
+    bottom: 92px;
+}
+
+/* Telas grandes: as colunas da direita ganham um espaço no fim, para rolar o conteúdo para cima do botão */
+@media (min-width: 1200px) {
+
+    .detalhe,
+    .lateral {
+        padding-bottom: 76px;
     }
 }
