@@ -35,6 +35,16 @@
                 Usuário: <strong id="eu-sou-nome">—</strong>
             </button>
 
+            <!-- Botão flutuante: só o ícone; com o mouse em cima, mostra o texto -->
+            <button type="button" id="btn-relatorios" class="botao-flutuante" aria-label="Enviar relatórios">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M22 2 11 13"></path>
+                    <path d="M22 2 15 22 11 13 2 9 22 2z"></path>
+                </svg>
+                <span class="botao-flutuante-texto">Enviar relatórios</span>
+            </button>
+
             <button type="button" id="btn-sino" class="botao-icone" aria-label="Notificações">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                     stroke-linecap="round" aria-hidden="true">
@@ -266,6 +276,25 @@
                 <button type="submit" class="botao-principal" id="editar-salvar">Salvar alterações</button>
             </div>
         </form>
+    </dialog>
+    <dialog id="dialogo-relatorios" class="dialogo dialogo-largo">
+        <h2 class="dialogo-titulo">Enviar relatórios aos líderes</h2>
+        <p class="dica">Escolha ou arraste os PDFs. O líder de cada um é escolhido pelo nome do arquivo: confira antes
+            de enviar.</p>
+
+        <label class="arquivo relatorios-arquivo">
+            <input type="file" id="relatorios-pdf" accept="application/pdf" multiple>
+            <strong>Escolher os PDFs dos relatórios</strong>
+            <span>clique ou arraste aqui · pode ser vários de uma vez</span>
+        </label>
+
+        <div class="relatorios-lista" id="relatorios-lista"></div>
+        <p class="alerta" id="relatorios-erro"></p>
+
+        <div class="dialogo-botoes">
+            <button type="button" class="botao-secundario" id="relatorios-fechar">Fechar</button>
+            <button type="button" class="botao-principal" id="relatorios-enviar" disabled>Enviar</button>
+        </div>
     </dialog>
     <div id="carregando" class="carregando" role="status" hidden>
         <span class="carregando-roda" aria-hidden="true"></span>
