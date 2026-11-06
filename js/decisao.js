@@ -2,7 +2,8 @@
 // decisao.js: a coluna da direita (Lançar | Rejeitar)
 // =============================================================
 import { estado } from './estado.js';
-import { lancarOS, rejeitarOS, anexarPDF } from './api.js';
+import { lancarOS, rejeitarOS, cancelarOS, anexarPDF } from './api.js';
+import { atualizarAgora } from './atualizacao.js';
 import { mostrarAviso } from './util.js';
 import { quemSouEu } from './usuario.js';
 
@@ -28,6 +29,7 @@ function prepararDecisao(os) {
     trocarModo('lancar');
     document.getElementById('form-lancar').reset();
     document.getElementById('form-rejeitar').reset();
+    document.getElementById('form-cancelar').reset();
     document.getElementById('lancar-pdf-nome').textContent = 'Anexar PDF da O.S';
     document.getElementById('lancar-pdf-info').textContent = 'opcional · clique ou arraste aqui';
     document.getElementById('decisao-aviso').textContent = '';
@@ -54,9 +56,22 @@ function desenharSituacao(os) {
     const titulo = document.getElementById('situacao-titulo');
     const texto = document.getElementById('situacao-texto');
 
+    // Rejeitada: o analista ainda pode cancelar (se o líder não for corrigir)
+    const formCancelar = document.getElementById('form-cancelar-rejeitada');
+    formCancelar.hidden = os.status_aprovacao !== 'Rejeitado';
+    formCancelar.reset();
+    document.getElementById('situacao-aviso').textContent = '';
+
     if (os.status_aprovacao === 'Rejeitado') {
         titulo.textContent = 'Rejeitada';
         texto.textContent = 'Motivo: ' + (os.justificativa_controle || 'não informado');
+    } else if (os.status_aprovacao === 'Cancelado pelo controle') {
+        titulo.textContent = 'Cancelada pelo controle';
+        texto.textContent = 'Motivo: ' + (os.justificativa_controle || 'não informado');
+    } else if (os.status_aprovacao === 'Cancelado pelo líder') {
+        titulo.textContent = 'Cancelada pelo líder';
+        texto.textContent = 'O líder desistiu de corrigir. Motivo da rejeição: ' + (os.justificativa_controle || 'não informado');
+
     } else {
         titulo.textContent = 'Lançada';
         texto.textContent = (os.codigoOS ? `Registrada como OS ${os.codigoOS}. ` : '')
@@ -86,6 +101,7 @@ function trocarModo(modo) {
     }
     document.getElementById('form-lancar').hidden = modo !== 'lancar';
     document.getElementById('form-rejeitar').hidden = modo !== 'rejeitar';
+    document.getElementById('form-cancelar').hidden = modo !== 'cancelar';
 }
 
 function atualizarBotaoLancar() {
@@ -213,6 +229,7 @@ async function lancar() {
         avisarQueMudou(os);
     } catch (erro) {
         mostrarErro('Não foi possível lançar: ' + erro.message);
+        atualizarAgora();   // a tela pode estar velha (outro analista decidiu antes)
     } finally {
         atualizarBotaoLancar();
     }
@@ -248,9 +265,49 @@ async function rejeitar() {
         avisarQueMudou(os);
     } catch (erro) {
         mostrarErro('Não foi possível rejeitar: ' + erro.message);
+        atualizarAgora();   // a tela pode estar velha (outro analista decidiu antes)
     } finally {
         botao.disabled = false;
         botao.textContent = 'Rejeitar e avisar o líder';
+    }
+}
+
+// ---------- Cancelar (não tem conserto: o líder é avisado e não reenvia) ----------
+// Serve para os dois formulários: o da OS em análise e o da rejeitada
+async function cancelar(campo, botao, aviso) {
+    const os = osAberta();
+    if (!os) return;
+
+    const eu = quemSouEu();
+    if (!eu) {
+        aviso.textContent = 'Escolha quem você é em "Eu sou" (no topo) antes de cancelar.';
+        return;
+    }
+
+    const motivo = campo.value.trim();
+    if (!motivo) {
+        aviso.textContent = 'Escreva o motivo do cancelamento para o líder.';
+        return;
+    }
+    if (!confirm('Cancelar esta solicitação?\n\nO líder é avisado e não vai conseguir corrigir nem reenviar.')) return;
+
+    const textoDoBotao = botao.textContent;
+    botao.disabled = true;
+    botao.textContent = 'Cancelando…';
+    aviso.textContent = '';
+
+    try {
+        await cancelarOS(os.codigoTemp, motivo, eu.nome);
+        os.status_aprovacao = 'Cancelado pelo controle';
+        os.justificativa_controle = motivo;
+        mostrarAviso('Solicitação cancelada. O líder foi avisado.');
+        avisarQueMudou(os);
+    } catch (erro) {
+        aviso.textContent = 'Não foi possível cancelar: ' + erro.message;
+    } finally {
+        botao.disabled = false;
+        botao.textContent = textoDoBotao;
+        atualizarAgora();   // deu certo ou não, confere a lista (apontamentos pendurados também mudam)
     }
 }
 
@@ -276,4 +333,16 @@ document.getElementById('form-lancar').addEventListener('submit', evento => {
 document.getElementById('form-rejeitar').addEventListener('submit', evento => {
     evento.preventDefault();
     rejeitar();
+});
+
+document.getElementById('form-cancelar').addEventListener('submit', evento => {
+    evento.preventDefault();
+    cancelar(document.getElementById('cancelar-motivo'), document.getElementById('cancelar-botao'),
+        document.getElementById('decisao-aviso'));
+});
+
+document.getElementById('form-cancelar-rejeitada').addEventListener('submit', evento => {
+    evento.preventDefault();
+    cancelar(document.getElementById('cancelar-rejeitada-motivo'), document.getElementById('cancelar-rejeitada-botao'),
+        document.getElementById('situacao-aviso'));
 });
