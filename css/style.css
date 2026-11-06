@@ -692,7 +692,7 @@ textarea {
 
 .decisao-abas {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(3, 1fr);
     gap: 4px;
     padding: 4px;
     background: var(--fundo);
@@ -812,6 +812,28 @@ textarea {
 .botao-perigo:disabled {
     opacity: 0.45;
     cursor: not-allowed;
+}
+
+/* Cancelar: cinza escuro, para não confundir com o vermelho do Rejeitar */
+.botao-cancelar {
+    height: 44px;
+    border: 0;
+    border-radius: var(--raio);
+    background: var(--texto-medio);
+    color: #FFFFFF;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.botao-cancelar:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+/* O cancelar da rejeitada fica embaixo do motivo, separado por uma linha */
+.situacao-cancelar {
+    padding-top: 14px;
+    border-top: 1px solid var(--linha);
 }
 
 .motivos {
