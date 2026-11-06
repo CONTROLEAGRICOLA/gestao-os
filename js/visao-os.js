@@ -8,7 +8,10 @@ import { bloco, campo } from './detalhe.js';
 import { criar, formatarHa, formatarPeriodo, dataCurta, lerDataBR, lerTalhoes, lerEquipamentos, numeroBR, semAcento, NOMES_DOS_TIPOS, redesenhar } from './util.js';
 
 // Como a situação de um apontamento aparece na ficha
-const SITUACAO_DO_APONTAMENTO = { 'OS Lançada': 'lançado', 'Em análise': 'em análise', 'Rejeitado': 'rejeitado' };
+const SITUACAO_DO_APONTAMENTO = {
+    'OS Lançada': 'lançado', 'Em análise': 'em análise', 'Rejeitado': 'rejeitado',
+    'Cancelado pelo líder': 'cancelado pelo líder', 'Cancelado pelo controle': 'cancelado pelo controle'
+};
 
 let visaoAtual = 'solicitacoes';
 
@@ -230,7 +233,7 @@ function itemApontamento(a) {
         criar('span', '', `${a.solicitante_nome} · enviado em ${a.dataSincronizacao}`)
     );
     if (detalhe) item.append(criar('span', 'evento-detalhe', detalhe));
-    if (a.status_aprovacao === 'Rejeitado' && a.justificativa_controle) {
+    if ((a.status_aprovacao === 'Rejeitado' || a.status_aprovacao === 'Cancelado pelo controle') && a.justificativa_controle) {
         item.append(criar('span', 'evento-detalhe', 'Motivo: ' + a.justificativa_controle));
     }
 
