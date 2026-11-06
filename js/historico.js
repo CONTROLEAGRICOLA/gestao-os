@@ -10,7 +10,8 @@ const TITULOS = {
     'LANÇOU': 'Lançada',
     'REJEITOU': 'Rejeitada',
     'ANEXOU PDF': 'PDF anexado',
-    'EDITOU': 'Editada pelo analista'
+    'EDITOU': 'Editada pelo analista',
+    'CANCELOU': 'Cancelada'
 };
 
 let pedidoAtual = 0;   // para ignorar resposta de uma OS que já não está aberta
@@ -48,13 +49,14 @@ function evento(registro) {
 
     let titulo = TITULOS[registro.acao] || registro.acao;
     if (registro.acao === 'LANÇOU' && registro.depois) titulo += ' como ' + registro.depois;
-
+    // No LOG, o CAMPO do cancelamento diz quem cancelou: "Cancelado pelo líder" vira "Cancelada pelo líder"
+    if (registro.acao === 'CANCELOU' && registro.campo) titulo = registro.campo.replace('Cancelado', 'Cancelada');
     item.append(
         criar('strong', '', titulo),
         criar('span', '', [registro.quem, registro.quando].filter(Boolean).join(' · '))
     );
 
-    if (registro.acao === 'REJEITOU' && registro.depois) {
+    if ((registro.acao === 'REJEITOU' || registro.acao === 'CANCELOU') && registro.depois) {
         item.append(criar('span', 'evento-detalhe', registro.depois));
     }
     if (registro.acao === 'EDITOU') {
