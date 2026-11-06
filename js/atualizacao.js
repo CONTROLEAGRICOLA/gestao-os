@@ -41,6 +41,11 @@ export function comecarAtualizacao() {
     });
 }
 
+// Confere agora, sem esperar os 10 segundos (ex.: o servidor recusou porque a tela estava velha)
+export function atualizarAgora() {
+    verificar();
+}
+
 async function verificar() {
     if (verificando) {          // já tem uma em andamento: roda de novo quando ela terminar
         verificarDeNovo = true;
