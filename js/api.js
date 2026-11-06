@@ -80,6 +80,11 @@ export function rejeitarOS(codigoTemp, justificativa, analista) {
     return enviar({ action: 'rejeitar_os', codigoTemp, justificativa, analista });
 }
 
+// Cancelar pelo controle: o líder é avisado e não consegue reenviar
+export function cancelarOS(codigoTemp, motivo, analista) {
+    return enviar({ action: 'cancelar_controle', codigoTemp, motivo, analista });
+}
+
 // Só vai o que mudou. Se "produtos" não for passado, os insumos ficam como estão.
 export function editarOS(codigoTemp, analista, dados, produtos) {
     return enviar({ action: 'editar_analista', codigoTemp, analista, dados, produtos });
