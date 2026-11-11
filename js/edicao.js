@@ -4,7 +4,8 @@
 import { estado } from './estado.js';
 import { buscarListas, editarOS } from './api.js';
 import { quemSouEu } from './usuario.js';
-import { mostrarAviso, tituloDaOS } from './util.js';
+import { mostrarAviso, tituloDaOS, lerTalhoes, formatarHa } from './util.js';
+import { montarOrdens, andamentoPorTalhao } from './ordens.js';
 import { preencherTalhoes, textoDosTalhoes, conferirTalhoes } from './edicao-talhoes.js';
 import { preencherEquipamentos, textoDosEquipamentos, conferirEquipamentos } from './edicao-equipamentos.js';
 import { preencherInsumos, lerInsumos, resumoDosInsumos, conferirInsumos } from './edicao-insumos.js';
@@ -20,22 +21,30 @@ const selectOperacao = document.getElementById('editar-operacao');
 let listas = null;          // fazendas e operações (rota 'init'), carregadas uma vez só
 let osEditando = null;      // a OS que está no formulário
 let valoresIniciais = {};   // como o formulário estava ao abrir
+let modoLancada = false;    // true = editando OS já lançada (aba Ordens de Serviço)
 
 const ordenar = (a, b) => a.localeCompare(b, 'pt-BR', { numeric: true });
 
 // ---------- Abrir ----------
-async function abrirEdicao() {
-    const os = estado.lista.find(o => o.codigoTemp === estado.selecionada);
-    if (!os || os.status_aprovacao !== 'Em análise') return;
+// Em análise (botão Editar de Solicitações) ou OS lançada (botão Editar OS de Ordens de Serviço)
+export async function abrirEdicao(codigoTemp) {
+    const os = estado.lista.find(o => o.codigoTemp === codigoTemp);
+    if (!os) return;
+    const lancada = os.status_aprovacao === 'OS Lançada' && os.tipo_registro === 'LANCAMENTO';
+    if (!lancada && os.status_aprovacao !== 'Em análise') return;
     if (!quemSouEu()) {
         mostrarAviso('Escolha quem é você em "Usuário" antes de editar.', 'alerta');
         return;
     }
 
     osEditando = os;
+    modoLancada = lancada;
     erro.textContent = '';
-    document.getElementById('editar-subtitulo').textContent =
-        `${tituloDaOS(os)} · ${os.solicitante_nome}. O líder recebe um aviso com o que mudou.`;
+    document.getElementById('editar-titulo').textContent =
+        lancada ? `Editar OS ${numerosDoTexto(os.codigoOS).join(' · ')}` : 'Editar solicitação';
+    document.getElementById('editar-subtitulo').textContent = lancada
+        ? `${os.solicitante_nome}. Edite os campos da Ordem de Serviço`
+        : `${tituloDaOS(os)} · ${os.solicitante_nome}. O responsável será notificado da alteração.`;
     form.hidden = true;
     carregando.hidden = false;
     carregando.textContent = 'Carregando listas…';
@@ -49,6 +58,7 @@ async function abrirEdicao() {
     }
 
     preencher(os);
+    prepararModo(lancada);
     carregando.hidden = true;
     form.hidden = false;
     valoresIniciais = lerFormulario();
@@ -76,11 +86,52 @@ function preencher(os) {
     campos.programacao.value = os.programacao === 'NÃO' ? 'NÃO' : 'SIM';
     campos.carreador.value = textoDe(os.carreador);
     campos.observacao.value = textoDe(os.observacao);
+    campos.codigo_os.value = numerosDoTexto(os.codigoOS).join(', ');
+    campos.motivo.value = '';
     mostrarJustificativa();
 
     preencherTalhoes(os.talhoes, listas.fazendas);   // depois da fazenda: os talhões dependem dela
     preencherEquipamentos(os.equipamentos, listas.equipamentos);
     preencherInsumos(os, listas.insumos);
+}
+// OS lançada: trava fazenda, centro de custo e operação; mostra o número e o motivo.
+// Em análise: o contrário. (Campo "disabled" não entra no FormData, então nem é comparado.)
+function prepararModo(lancada) {
+    form.elements.fazenda.readOnly = lancada;
+    selectCC.disabled = lancada;
+    selectOperacao.disabled = lancada;
+    for (const id of ['campo-numero-os', 'campo-motivo']) {
+        const campo = document.getElementById(id);
+        campo.hidden = !lancada;
+        campo.querySelector('input').disabled = !lancada;
+    }
+    avisarApontado();
+}
+
+// "10577, 10578" ou "10577;10578" → ['10577', '10578'] (sem repetir)
+function numerosDoTexto(texto) {
+    return [...new Set(String(texto ?? '').split(/[^\d]+/).filter(Boolean))];
+}
+
+// OS lançada: avisa (sem impedir) quando tira um talhão já apontado ou deixa a área menor que o apontado
+function avisarApontado() {
+    const aviso = document.getElementById('editar-apontado');
+    aviso.textContent = '';
+    if (!modoLancada) return;
+
+    const ordem = montarOrdens(estado.lista).find(o => o.abertura.codigoTemp === osEditando.codigoTemp);
+    if (!ordem) return;
+    const agora = new Map(lerTalhoes(textoDosTalhoes()).map(t => [t.numero, t.area]));
+    const avisos = [];
+    for (const t of andamentoPorTalhao(ordem)) {
+        if (t.feito <= 0) continue;   // talhão sem apontamento: pode mexer à vontade
+        if (!agora.has(t.numero)) {
+            avisos.push(`O talhão ${t.numero} saiu da OS, mas já tem ${formatarHa(t.feito)} apontados.`);
+        } else if (agora.get(t.numero) < t.feito - 0.005) {
+            avisos.push(`Talhão ${t.numero}: ${formatarHa(agora.get(t.numero))} é menos que os ${formatarHa(t.feito)} já apontados.`);
+        }
+    }
+    aviso.textContent = avisos.join('\n');
 }
 
 // Monta as opções de um <select>. Se o valor atual não está na lista (dado antigo), entra também.
@@ -124,6 +175,7 @@ function lerFormulario() {
     valores.talhoes = textoDosTalhoes();
     valores.equipamentos = textoDosEquipamentos();
     valores.insumos = resumoDosInsumos();
+    if ('codigo_os' in valores) valores.codigo_os = numerosDoTexto(valores.codigo_os).join(';');
     return valores;
 }
 
@@ -156,6 +208,11 @@ function conferir(atuais, mudou) {
         return 'Sem programação, a justificativa é obrigatória.';
     }
 
+    if (mudou('codigo_os')) {
+        const problema = conferirNumero(atuais.codigo_os);
+        if (problema) return problema;
+    }
+
     if (mudou('equipamentos')) {
         const problema = conferirEquipamentos();
         if (problema) return problema;
@@ -167,10 +224,23 @@ function conferir(atuais, mudou) {
     return '';
 }
 
+// Número da OS (só na lançada): pelo menos um, e nenhum que já seja de outra OS
+function conferirNumero(texto) {
+    const numeros = texto ? texto.split(';') : [];
+    if (numeros.length === 0) return 'Escreva o número da OS.';
+    for (const outra of estado.lista) {
+        if (outra.tipo_registro !== 'LANCAMENTO' || outra.codigoTemp === osEditando.codigoTemp) continue;
+        const repetido = numerosDoTexto(outra.codigoOS).find(n => numeros.includes(n));
+        if (repetido) return `O número ${repetido} já é de outra OS (${outra.descricao_fazenda}). Confira no PIMS.`;
+    }
+    return '';
+}
+
 // Só vai para o servidor o que mudou. A fazenda vira as 3 colunas da planilha.
 function montarDados(atuais, mudou) {
     const dados = {};
     for (const chave in atuais) {
+        if (chave === 'motivo') continue;   // o motivo vai separado (não é um campo da OS)
         if (mudou(chave)) dados[chave] = atuais[chave];
     }
     if ('fazenda' in dados) {
@@ -210,15 +280,16 @@ form.addEventListener('submit', async evento => {
     botaoSalvar.disabled = true;
     botaoSalvar.textContent = 'Salvando…';
     try {
-        const resposta = await editarOS(osEditando.codigoTemp, quemSouEu().nome, dados, produtos);
+        const resposta = await editarOS(osEditando.codigoTemp, quemSouEu().nome, dados, produtos, atuais.motivo || '');
 
         Object.assign(osEditando, dados);   // atualiza a OS na memória, sem esperar a lista nova
         if ('area_total' in dados) osEditando.area_total = Number(dados.area_total);
+        if ('codigo_os' in dados) osEditando.codigoOS = dados.codigo_os;
         if (produtos) osEditando.produtos = produtos;
 
         dialogo.close();
         mostrarAviso(resposta.alterados
-            ? `Ajustado: ${resposta.campos.join(', ')}. O líder recebe o aviso no celular.`
+            ? `Ajustado: ${resposta.campos.join(', ')}. O responsável recebe o aviso no celular.`
             : 'Nada mudou na planilha.');
         document.dispatchEvent(new CustomEvent('os-mudou', { detail: osEditando }));
     } catch (falha) {
@@ -232,9 +303,19 @@ form.addEventListener('submit', async evento => {
 // ---------- Botões ----------
 // O detalhe é redesenhado toda hora, por isso o clique é ouvido na coluna inteira
 document.getElementById('detalhe').addEventListener('click', evento => {
-    if (evento.target.closest('#btn-editar')) abrirEdicao();
+    if (evento.target.closest('#btn-editar')) abrirEdicao(estado.selecionada);
 });
 
 document.getElementById('editar-cancelar').addEventListener('click', () => dialogo.close());
 selectCC.addEventListener('change', () => preencherOperacoes(''));
 form.elements.programacao.addEventListener('change', mostrarJustificativa);
+
+
+// Número da OS: só números, vírgula, ponto e vírgula e espaço
+form.elements.codigo_os.addEventListener('input', evento => {
+    evento.target.value = evento.target.value.replace(/[^\d,;\s]/g, '');
+});
+
+// Mexeu nos talhões (área, tirar, adicionar): confere de novo com o que já foi apontado
+form.addEventListener('input', avisarApontado);
+form.addEventListener('click', avisarApontado);

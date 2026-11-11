@@ -10,6 +10,7 @@ const TITULOS = {
     'LANÇOU': 'Lançada',
     'REJEITOU': 'Rejeitada',
     'ANEXOU PDF': 'PDF anexado',
+    'TROCOU PDF': 'PDF trocado',
     'EDITOU': 'Editada pelo analista',
     'CANCELOU': 'Cancelada'
 };
@@ -61,6 +62,10 @@ function evento(registro) {
     }
     if (registro.acao === 'EDITOU') {
         for (const m of registro.mudancas) {
+            if (m.campo === 'Motivo da alteração') {
+                item.append(criar('span', 'evento-detalhe', 'Motivo: ' + m.depois));
+                continue;
+            }
             const antes = valorLegivel(m.campo, m.antes);
             const depois = valorLegivel(m.campo, m.depois);
             item.append(criar('span', 'evento-detalhe', `${m.campo}: ${antes} → ${depois}`));
@@ -93,5 +98,6 @@ function valorLegivel(campo, valor) {
     if (data) return `${data[3]}/${data[2]}/${data[1]}`;
 
     if (campo === 'Área total') return numeroBR(texto) + ' ha';
+    if (campo === 'Número da OS') return texto.replace(/;/g, ' · ');   // 11139;11152 → 11139 · 11152           f
     return texto;
 }

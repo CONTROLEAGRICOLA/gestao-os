@@ -86,8 +86,8 @@ export function cancelarOS(codigoTemp, motivo, analista) {
 }
 
 // Só vai o que mudou. Se "produtos" não for passado, os insumos ficam como estão.
-export function editarOS(codigoTemp, analista, dados, produtos) {
-    return enviar({ action: 'editar_analista', codigoTemp, analista, dados, produtos });
+export function editarOS(codigoTemp, analista, dados, produtos, motivo = '') {
+    return enviar({ action: 'editar_analista', codigoTemp, analista, dados, produtos, motivo });
 }
 
 export async function anexarPDF(codigoTemp, arquivo, analista = '') {

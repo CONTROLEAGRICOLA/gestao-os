@@ -21,6 +21,9 @@ export function desenharDecisao(os) {
 export function atualizarDecisao(os) {
     const mostrandoDecisao = !document.getElementById('decisao').hidden;
     if (mostrandoDecisao && os.status_aprovacao === 'Em análise') return;   // não apaga o que está sendo digitado
+    // Cartão da situação: só redesenha se algo mudou (senão apagaria o PDF escolhido ou o motivo sendo digitado)
+    const situacao = document.getElementById('situacao');
+    if (!situacao.hidden && situacao.dataset.desenhado === marcaDaSituacao(os)) return;
     desenharDecisao(os);
 }
 
@@ -62,6 +65,12 @@ function desenharSituacao(os) {
     formCancelar.reset();
     document.getElementById('situacao-aviso').textContent = '';
 
+    // Lançada: PDF, número e edição ficam na aba Ordens de Serviço
+    const verNaOS = document.getElementById('ver-na-os');
+    verNaOS.hidden = os.status_aprovacao !== 'OS Lançada';
+    verNaOS.dataset.ordem = os.tipo_registro === 'LANCAMENTO' ? os.codigoTemp : os.os_origem;   // apontamento: a OS de origem
+    document.getElementById('situacao').dataset.desenhado = marcaDaSituacao(os);
+
     if (os.status_aprovacao === 'Rejeitado') {
         titulo.textContent = 'Rejeitada';
         texto.textContent = 'Motivo: ' + (os.justificativa_controle || 'não informado');
@@ -74,12 +83,15 @@ function desenharSituacao(os) {
 
     } else {
         titulo.textContent = 'Lançada';
-        texto.textContent = (os.codigoOS ? `Registrada como OS ${os.codigoOS}. ` : '')
-            + (os.pdf_url ? 'PDF anexado.' : 'Sem PDF anexado.');
+        texto.textContent = (os.codigoOS ? `Registrada como OS ${numerosDaOS(os).join(' · ')}. ` : '')
     }
 }
 
 // "11038;11039" → ['11038', '11039'] (uma solicitação pode virar mais de uma OS)
+// O que o cartão da situação está mostrando (se nada disso mudou, não precisa redesenhar)
+function marcaDaSituacao(os) {
+    return [os.codigoTemp, os.status_aprovacao, os.codigoOS, os.pdf_url].join('|');
+}
 function numerosDaOS(os) {
     return String(os.codigoOS ?? '').split(';').map(n => n.trim()).filter(Boolean);
 }
@@ -164,7 +176,7 @@ function conferir() {
 }
 
 // O PDF tem algum problema que impede o envio? (devolve o texto do problema, ou vazio)
-function problemaNoPDF(arquivo) {
+export function problemaNoPDF(arquivo) {
     if (arquivo.type !== 'application/pdf') return 'O arquivo precisa ser PDF.';
     if (arquivo.size === 0) return 'O PDF está vazio (0 KB). Gere o arquivo de novo no PIMS.';
     if (arquivo.size > 10 * 1024 * 1024) return 'O PDF passa de 10 MB.';
@@ -324,6 +336,10 @@ document.getElementById('lancar-numero').addEventListener('input', evento => {
 });
 
 document.getElementById('lancar-pdf').addEventListener('change', aoEscolherPDF);
+
+document.getElementById('ver-na-os').addEventListener('click', evento => {
+    document.dispatchEvent(new CustomEvent('abrir-ordem', { detail: evento.currentTarget.dataset.ordem }));
+});
 
 document.getElementById('form-lancar').addEventListener('submit', evento => {
     evento.preventDefault();

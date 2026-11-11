@@ -1281,6 +1281,13 @@ textarea {
     padding: 0 14px;
 }
 
+/* O "Ajustar" do carreador fica no meio da linha (o .link-botao sozinho sobe para o topo) */
+/* O botão do carreador fica no meio da linha (o .link-botao sozinho sobe para o topo) */
+.linha-edicao .link-botao {
+    align-self: center;
+    white-space: nowrap;
+}
+
 .linha-edicao.acima {
     background: #FDECEA;
 }
@@ -1294,7 +1301,8 @@ textarea {
     font-weight: 600;
 }
 
-.form-editar input[readonly] {
+.form-editar input[readonly],
+.form-editar select:disabled {
     background: var(--fundo);
     color: var(--texto-medio);
 }

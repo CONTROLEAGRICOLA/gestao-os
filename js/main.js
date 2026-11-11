@@ -58,14 +58,6 @@ function abrirOS(codigo) {
     desenharHistorico(os);
     return true;
 }
-// Se o painel estiver dentro do Portal PCA (tela dividida), diz ao portal qual OS está aberta
-function avisarPortal(os) {
-    try {
-        if (window.parent === window) return;
-        const numero = String(os.numero_origem || os.codigoOS || '').replace(/\D/g, '');
-        window.parent.postMessage({ tipo: 'gestao-os-aberta', os: numero }, '*');
-    } catch (erro) { /* fora do portal: nada a fazer */ }
-}
 
 // ---------- Uma OS foi lançada ou rejeitada (aviso que vem do decisao.js) ----------
 document.addEventListener('os-mudou', evento => {

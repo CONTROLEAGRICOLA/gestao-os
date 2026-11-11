@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
-    <link rel="stylesheet" href="css/style.css?v=3">
+    <link rel="stylesheet" href="css/style.css">
 </head>
 
 <body>
@@ -136,7 +136,7 @@
                             <label class="campo-form">
                                 Motivo da rejeição
                                 <textarea id="rejeitar-detalhe" rows="4"
-                                    placeholder="Justificativa"></textarea>
+                                    placeholder="Explique ao responsável o que precisa ser corrigido…"></textarea>
                             </label>
 
                             <button type="submit" class="botao-perigo" id="rejeitar-botao">Rejeitar</button>
@@ -147,7 +147,7 @@
                             <label class="campo-form">
                                 Motivo do cancelamento
                                 <textarea id="cancelar-motivo" rows="3"
-                                    placeholder="Justificativa"></textarea>
+                                    placeholder="Explique ao responsável por que foi cancelada…"></textarea>
                             </label>
 
                             <button type="submit" class="botao-cancelar" id="cancelar-botao">Cancelar
@@ -161,6 +161,9 @@
                     <section class="cartao bloco" id="situacao" hidden>
                         <h2 class="decisao-titulo" id="situacao-titulo"></h2>
                         <p class="situacao-texto" id="situacao-texto"></p>
+                        <!-- OS lançada: PDF, número e edição ficam na aba Ordens de Serviço -->
+                        <button type="button" class="link-botao" id="ver-na-os" hidden>Ver em Ordens de Serviço
+                            →</button>
                         <!-- Rejeitada que o líder deixou parada: o analista pode cancelar -->
                         <form id="form-cancelar-rejeitada" class="decisao-form situacao-cancelar" hidden>
                             <label class="campo-form">
@@ -217,7 +220,7 @@
     </dialog>
 
     <dialog id="dialogo-editar" class="dialogo dialogo-largo">
-        <h2 class="dialogo-titulo">Editar solicitação</h2>
+        <h2 class="dialogo-titulo" id="editar-titulo">Editar solicitação</h2>
         <p class="dica" id="editar-subtitulo"></p>
         <p class="dica" id="editar-carregando">Carregando listas…</p>
         <datalist id="lista-fazendas"></datalist>
@@ -225,6 +228,10 @@
         <datalist id="lista-insumos"></datalist>
 
         <form id="form-editar" class="form-editar" hidden>
+            <!-- Só na OS lançada (aba Ordens de Serviço) -->
+            <label class="campo-form inteiro" id="campo-numero-os" hidden>Número da OS · mais de um, separe com vírgula
+                <input name="codigo_os" inputmode="numeric" autocomplete="off" placeholder="Ex.: 10577, 10578">
+            </label>
             <label class="campo-form inteiro">Fazenda
                 <input name="fazenda" list="lista-fazendas" autocomplete="off">
             </label>
@@ -237,6 +244,7 @@
                     <button type="button" class="botao-secundario" id="editar-add-talhao">Adicionar</button>
                 </div>
                 <p class="alerta" id="editar-talhoes-aviso"></p>
+                <p class="alerta" id="editar-apontado"></p>
             </fieldset>
             <label class="campo-form">Centro de custo
                 <select name="centro_custo" id="editar-cc"></select>
@@ -293,6 +301,10 @@
                 <textarea name="observacao" rows="3"></textarea>
             </label>
 
+            <!-- Só na OS lançada: vai para o histórico e para o aviso do líder -->
+            <label class="campo-form inteiro" id="campo-motivo" hidden>Motivo da alteração (opcional)
+                <input name="motivo" autocomplete="off">
+
             <p class="alerta inteiro" id="editar-erro"></p>
 
             <div class="dialogo-botoes inteiro">
@@ -301,9 +313,27 @@
             </div>
         </form>
     </dialog>
+    <!-- Trocar ou anexar o PDF de uma OS lançada (aberta pela aba Ordens de Serviço) -->
+    <dialog id="dialogo-pdf" class="dialogo">
+        <form id="form-pdf" class="decisao-form">
+            <h2 class="dialogo-titulo" id="pdf-titulo">Trocar o PDF da OS</h2>
+            <p class="dica" id="pdf-subtitulo"></p>
+            <label class="arquivo">
+                <input type="file" id="pdf-novo" accept="application/pdf">
+                <strong id="pdf-novo-nome">Escolher o PDF</strong>
+                <span id="pdf-novo-info">clique ou arraste aqui</span>
+            </label>
+            <p class="alerta" id="pdf-novo-alerta"></p>
+            <p class="decisao-aviso" id="pdf-novo-aviso" role="status"></p>
+            <div class="dialogo-botoes">
+                <button type="button" class="botao-secundario" id="pdf-fechar">Cancelar</button>
+                <button type="submit" class="botao-principal" id="pdf-novo-botao">Trocar o PDF</button>
+            </div>
+        </form>
+    </dialog>
     <dialog id="dialogo-relatorios" class="dialogo dialogo-largo">
-        <h2 class="dialogo-titulo">Enviar relatórios aos líderes</h2>
-        <p class="dica">Escolha ou arraste os PDFs. O líder de cada um é escolhido pelo nome do arquivo: confira antes
+        <h2 class="dialogo-titulo">Enviar relatórios aos responsáveiss</h2>
+        <p class="dica">Escolha ou arraste os PDFs. O responsável de cada um é escolhido pelo nome do arquivo: confira antes
             de enviar.</p>
 
         <label class="arquivo relatorios-arquivo">

@@ -6,6 +6,8 @@ import { montarOrdens, andamentoPorTalhao, SITUACOES } from './ordens.js';
 import { responsavelDaOS } from './analistas.js';
 import { bloco, campo } from './detalhe.js';
 import { criar, formatarHa, formatarPeriodo, dataCurta, lerDataBR, lerTalhoes, lerEquipamentos, numeroBR, semAcento, NOMES_DOS_TIPOS, redesenhar } from './util.js';
+import { abrirTrocaPDF } from './acoes-os.js';
+import { abrirEdicao } from './edicao.js';
 
 // Como a situação de um apontamento aparece na ficha
 const SITUACAO_DO_APONTAMENTO = {
@@ -38,7 +40,8 @@ function mudarVisao(nova) {
 
 // ---------- A tela inteira ----------
 function desenharVisaoOS() {
-    const ordens = montarOrdens(estado.lista).filter(aparece);
+    const todas = montarOrdens(estado.lista);
+    const ordens = todas.filter(aparece);
 
     const abertas = ordens.filter(o => o.situacao !== 'encerrada');
     const encerradas = ordens.filter(o => o.situacao === 'encerrada');
@@ -58,7 +61,7 @@ function desenharVisaoOS() {
 
     desenharLista(daAba);
 
-    const escolhida = ordens.find(o => o.abertura.codigoTemp === osEscolhida);
+    const escolhida = todas.find(o => o.abertura.codigoTemp === osEscolhida);   // mesmo se o filtro esconde da lista
     if (escolhida) {
         desenharFicha(escolhida);
     } else {
@@ -152,17 +155,35 @@ function cabecalhoDaFicha(ordem) {
         criar('h1', 'detalhe-titulo', numeroDaOS(os)),
         criar('p', 'detalhe-quem', [os.fa_codigo, os.descricao_fazenda, os.operacao].filter(Boolean).join(' · ')),
         criar('p', 'detalhe-quem',
-            `Líder ${os.solicitante_nome} · pedida em ${os.dataSincronizacao} · previsão ${formatarPeriodo(os.data_prevista_inicio, os.data_prevista_fim)}`)
+            `Responsável ${os.solicitante_nome} · pedida em ${os.dataSincronizacao} · previsão ${formatarPeriodo(os.data_prevista_inicio, os.data_prevista_fim)}`)
     );
 
+    // Abrir o PDF e, se a OS ainda não foi encerrada, trocar ou anexar
+    const acoes = criar('div', 'apontamento-links');
     if (os.pdf_url) {
         const pdf = criar('a', 'link-botao', 'Abrir o PDF da OS');
         pdf.href = os.pdf_url;
         pdf.target = '_blank';
         pdf.rel = 'noopener';
-        caixa.append(pdf);
+        acoes.append(pdf);
     }
+    if (ordem.situacao !== 'encerrada') {
+        const editar = criar('button', 'link-botao', '✏️ Editar OS');
+        editar.type = 'button';
+        editar.dataset.editar = os.codigoTemp;
+        acoes.append(botaoPDF(os), editar);
+    }
+    if (acoes.children.length > 0) caixa.append(acoes);
     return caixa;
+}
+
+// Botão que abre a janela de trocar (ou anexar) o PDF
+function botaoPDF(registro) {
+    const botao = criar('button', 'link-botao', registro.pdf_url ? 'Trocar o PDF' : 'Anexar PDF');
+    botao.type = 'button';
+    botao.dataset.pdf = registro.codigoTemp;
+    return botao;
+
 }
 
 function blocoAndamento(ordem) {
@@ -214,11 +235,11 @@ function blocoApontamentos(ordem) {
         return bloco('Apontamentos', criar('p', 'bloco-vazio', 'Nenhum apontamento ainda.'));
     }
     const lista = criar('ol', 'linha-do-tempo');
-    lista.append(...ordem.apontamentos.map(itemApontamento));
+    lista.append(...ordem.apontamentos.map(a => itemApontamento(a, ordem)));
     return bloco('Apontamentos', lista, String(ordem.apontamentos.length));
 }
 
-function itemApontamento(a) {
+function itemApontamento(a, ordem) {
     const item = criar('li', 'evento');
     item.dataset.status = a.status_aprovacao;
 
@@ -237,7 +258,7 @@ function itemApontamento(a) {
         item.append(criar('span', 'evento-detalhe', 'Motivo: ' + a.justificativa_controle));
     }
 
-    item.append(detalhesDoApontamento(a));
+    item.append(detalhesDoApontamento(a, ordem));
     return item;
 }
 const UMA_HORA = 60 * 60 * 1000;   // em milissegundos
@@ -247,7 +268,7 @@ function dataHora(texto) {
 }
 
 // "Detalhes": abre e fecha ali mesmo, embaixo do apontamento, sem sair da tela
-function detalhesDoApontamento(a) {
+function detalhesDoApontamento(a, ordem) {
     const caixa = criar('details', 'apontamento-detalhes');
     caixa.open = detalhesAbertos.has(a.codigoTemp);
     caixa.addEventListener('toggle', () => {
@@ -282,6 +303,8 @@ function detalhesDoApontamento(a) {
         pdf.rel = 'noopener';
         links.append(pdf);
     }
+
+    if (a.status_aprovacao === 'OS Lançada' && ordem.situacao !== 'encerrada') links.append(botaoPDF(a));
 
     const conteudo = criar('div', 'apontamento-conteudo');
     conteudo.append(campos, links);
@@ -321,10 +344,30 @@ export function iniciarVisaoOS() {
     document.getElementById('os-ficha').addEventListener('click', evento => {
         const botao = evento.target.closest('[data-abrir]');
         if (botao) document.dispatchEvent(new CustomEvent('abrir-os', { detail: botao.dataset.abrir }));
+        const pdf = evento.target.closest('[data-pdf]');
+        if (pdf) abrirTrocaPDF(pdf.dataset.pdf);
+
+        const editar = evento.target.closest('[data-editar]');
+        if (editar) abrirEdicao(editar.dataset.editar);
     });
+
+
 
     // Alguém pediu para abrir uma solicitação (este botão ou a notificação): volta para Solicitações
     document.addEventListener('abrir-os', () => mudarVisao('solicitacoes'));
+
+    // "Ver em Ordens de Serviço" (vem da tela de Solicitações): abre a OS na aba certa
+    document.addEventListener('abrir-ordem', evento => {
+        const ordem = montarOrdens(estado.lista).find(o => o.abertura.codigoTemp === evento.detail);
+        if (!ordem) return;
+        osEscolhida = ordem.abertura.codigoTemp;
+        abaOS = ordem.situacao === 'encerrada' ? 'encerradas' : 'abertas';
+        for (const aba of document.querySelectorAll('#abas-os .aba')) {
+            aba.classList.toggle('ativa', aba.dataset.aba === abaOS);
+        }
+        mudarVisao('os');
+        document.querySelector('#os-lista .selecionado')?.scrollIntoView({ block: 'nearest' });
+    });
 
     // A lista chegou, uma OS mudou, o "Ver OS de" mudou ou digitaram na busca: redesenha
     const redesenhar = () => { if (visaoAtual === 'os') desenharVisaoOS(); };
