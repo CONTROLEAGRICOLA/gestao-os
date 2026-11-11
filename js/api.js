@@ -85,6 +85,12 @@ export function cancelarOS(codigoTemp, motivo, analista) {
     return enviar({ action: 'cancelar_controle', codigoTemp, motivo, analista });
 }
 
+
+// Rejeitada cuja pendência se resolveu: volta para "Em análise" sem o líder reenviar
+export function voltarParaAnalise(codigoTemp, analista) {
+    return enviar({ action: 'voltar_analise', codigoTemp, analista });
+}
+
 // Só vai o que mudou. Se "produtos" não for passado, os insumos ficam como estão.
 export function editarOS(codigoTemp, analista, dados, produtos, motivo = '') {
     return enviar({ action: 'editar_analista', codigoTemp, analista, dados, produtos, motivo });

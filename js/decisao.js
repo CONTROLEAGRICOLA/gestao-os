@@ -2,7 +2,7 @@
 // decisao.js: a coluna da direita (Lançar | Rejeitar)
 // =============================================================
 import { estado } from './estado.js';
-import { lancarOS, rejeitarOS, cancelarOS, anexarPDF } from './api.js';
+import { lancarOS, rejeitarOS, cancelarOS, anexarPDF, voltarParaAnalise } from './api.js';
 import { atualizarAgora } from './atualizacao.js';
 import { mostrarAviso } from './util.js';
 import { quemSouEu } from './usuario.js';
@@ -64,6 +64,10 @@ function desenharSituacao(os) {
     formCancelar.hidden = os.status_aprovacao !== 'Rejeitado';
     formCancelar.reset();
     document.getElementById('situacao-aviso').textContent = '';
+
+    // Rejeitada: o analista pode devolver para análise (a pendência se resolveu)
+    document.getElementById('bloco-voltar-analise').hidden = os.status_aprovacao !== 'Rejeitado';
+    document.getElementById('voltar-analise-aviso').textContent = '';
 
     // Lançada: PDF, número e edição ficam na aba Ordens de Serviço
     const verNaOS = document.getElementById('ver-na-os');
@@ -323,6 +327,39 @@ async function cancelar(campo, botao, aviso) {
     }
 }
 
+// ---------- Voltar para análise (a pendência da rejeitada se resolveu) ----------
+async function voltarAnalise() {
+    const os = osAberta();
+    if (!os) return;
+    const aviso = document.getElementById('voltar-analise-aviso');
+
+    const eu = quemSouEu();
+    if (!eu) {
+        aviso.textContent = 'Escolha quem você é em "Usuário" (no topo) antes.';
+        return;
+    }
+    if (!confirm('Voltar esta solicitação para análise?\n\nO líder é avisado e não precisa corrigir nem reenviar.')) return;
+
+    const botao = document.getElementById('voltar-analise-botao');
+    botao.disabled = true;
+    botao.textContent = 'Voltando…';
+    aviso.textContent = '';
+
+    try {
+        await voltarParaAnalise(os.codigoTemp, eu.nome);
+        os.status_aprovacao = 'Em análise';
+        os.justificativa_controle = '';
+        mostrarAviso('Voltou para análise. O líder foi avisado.');
+        avisarQueMudou(os);
+    } catch (erro) {
+        aviso.textContent = 'Não foi possível: ' + erro.message;
+        atualizarAgora();   // a tela pode estar velha (o líder pode ter reenviado ou cancelado)
+    } finally {
+        botao.disabled = false;
+        botao.textContent = '↩️ Voltar para análise';
+    }
+}
+
 // ---------- Os botões do cartão ----------
 document.querySelector('.decisao-abas').addEventListener('click', evento => {
     const aba = evento.target.closest('.decisao-aba');
@@ -356,6 +393,8 @@ document.getElementById('form-cancelar').addEventListener('submit', evento => {
     cancelar(document.getElementById('cancelar-motivo'), document.getElementById('cancelar-botao'),
         document.getElementById('decisao-aviso'));
 });
+
+document.getElementById('voltar-analise-botao').addEventListener('click', voltarAnalise);
 
 document.getElementById('form-cancelar-rejeitada').addEventListener('submit', evento => {
     evento.preventDefault();

@@ -12,7 +12,8 @@ const TITULOS = {
     'ANEXOU PDF': 'PDF anexado',
     'TROCOU PDF': 'PDF trocado',
     'EDITOU': 'Editada pelo analista',
-    'CANCELOU': 'Cancelada'
+    'CANCELOU': 'Cancelada',
+    'VOLTOU PARA ANÁLISE': 'Voltou para análise'
 };
 
 let pedidoAtual = 0;   // para ignorar resposta de uma OS que já não está aberta
