@@ -164,6 +164,13 @@
                         <!-- OS lançada: PDF, número e edição ficam na aba Ordens de Serviço -->
                         <button type="button" class="link-botao" id="ver-na-os" hidden>Ver em Ordens de Serviço
                             →</button>
+                        <!-- Rejeitada cuja pendência se resolveu: volta para análise sem o líder reenviar -->
+                        <div class="decisao-form situacao-cancelar" id="bloco-voltar-analise" hidden>
+                            <button type="button" class="botao-principal" id="voltar-analise-botao">↩️ Voltar para
+                                análise</button>
+                            <p class="dica">A solicitação voltará para "Solicitações em análise".</p>
+                            <p class="decisao-aviso" id="voltar-analise-aviso" role="status"></p>
+                        </div>
                         <!-- Rejeitada que o líder deixou parada: o analista pode cancelar -->
                         <form id="form-cancelar-rejeitada" class="decisao-form situacao-cancelar" hidden>
                             <label class="campo-form">
@@ -302,8 +309,10 @@
             </label>
 
             <!-- Só na OS lançada: vai para o histórico e para o aviso do líder -->
+            <!-- Só na OS lançada: vai para o histórico e para o aviso do líder -->
             <label class="campo-form inteiro" id="campo-motivo" hidden>Motivo da alteração (opcional)
-                <input name="motivo" autocomplete="off" placeholder="Ex.: líder pediu pelo WhatsApp para incluir o talhão 12">
+                <input name="motivo" autocomplete="off"
+                    placeholder="Ex.: líder pediu pelo WhatsApp para incluir o talhão 12">
             </label>
 
             <p class="alerta inteiro" id="editar-erro"></p>
@@ -334,7 +343,8 @@
     </dialog>
     <dialog id="dialogo-relatorios" class="dialogo dialogo-largo">
         <h2 class="dialogo-titulo">Enviar relatórios aos responsáveiss</h2>
-        <p class="dica">Escolha ou arraste os PDFs. O responsável de cada um é escolhido pelo nome do arquivo: confira antes
+        <p class="dica">Escolha ou arraste os PDFs. O responsável de cada um é escolhido pelo nome do arquivo: confira
+            antes
             de enviar.</p>
 
         <label class="arquivo relatorios-arquivo">
