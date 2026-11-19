@@ -235,6 +235,14 @@
         <datalist id="lista-insumos"></datalist>
 
         <form id="form-editar" class="form-editar" hidden>
+            <!-- Só no apontamento em análise: marcar (o líder esqueceu) ou desmarcar (foi engano) o encerramento -->
+            <div class="caixa-encerrar inteiro" id="campo-encerra" hidden>
+                <label class="linha-encerrar">
+                    <input type="checkbox" id="editar-encerra">
+                    🔒 Este apontamento encerra a OS
+                </label>
+                <small id="editar-encerra-dica"></small>
+            </div>
             <!-- Só na OS lançada (aba Ordens de Serviço) -->
             <label class="campo-form inteiro" id="campo-numero-os" hidden>Número da OS · mais de um, separe com vírgula
                 <input name="codigo_os" inputmode="numeric" autocomplete="off" placeholder="Ex.: 10577, 10578">
@@ -312,7 +320,7 @@
             <!-- Só na OS lançada: vai para o histórico e para o aviso do líder -->
             <label class="campo-form inteiro" id="campo-motivo" hidden>Motivo da alteração (opcional)
                 <input name="motivo" autocomplete="off"
-                    placeholder="Ex.: líder pediu pelo WhatsApp para incluir o talhão 12">
+                    placeholder="Ex.: Acrescentado talhão 1">
             </label>
 
             <p class="alerta inteiro" id="editar-erro"></p>
@@ -338,6 +346,23 @@
             <div class="dialogo-botoes">
                 <button type="button" class="botao-secundario" id="pdf-fechar">Cancelar</button>
                 <button type="submit" class="botao-principal" id="pdf-novo-botao">Trocar o PDF</button>
+            </div>
+        </form>
+    </dialog>
+    <!-- Encerrar ou reabrir uma OS lançada (aba Ordens de Serviço) -->
+    <dialog id="dialogo-encerrar" class="dialogo">
+        <form id="form-encerrar" class="decisao-form">
+            <h2 class="dialogo-titulo" id="encerrar-titulo">Encerrar a OS</h2>
+            <p class="dica" id="encerrar-subtitulo"></p>
+            <p class="encerrar-texto" id="encerrar-texto"></p>
+            <label class="campo-form" id="encerrar-campo-motivo">Motivo (opcional)
+                <input id="encerrar-motivo" autocomplete="off"
+                    placeholder="Ex.: líder esqueceu de marcar o encerramento">
+            </label>
+            <p class="decisao-aviso" id="encerrar-aviso" role="status"></p>
+            <div class="dialogo-botoes">
+                <button type="button" class="botao-secundario" id="encerrar-fechar">Cancelar</button>
+                <button type="submit" class="botao-perigo" id="encerrar-botao">Encerrar a OS</button>
             </div>
         </form>
     </dialog>

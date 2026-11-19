@@ -17,6 +17,8 @@ const erro = document.getElementById('editar-erro');
 const botaoSalvar = document.getElementById('editar-salvar');
 const selectCC = document.getElementById('editar-cc');
 const selectOperacao = document.getElementById('editar-operacao');
+const campoEncerra = document.getElementById('campo-encerra');
+const checkEncerra = document.getElementById('editar-encerra');
 
 let listas = null;          // fazendas e operações (rota 'init'), carregadas uma vez só
 let osEditando = null;      // a OS que está no formulário
@@ -90,6 +92,7 @@ function preencher(os) {
     campos.motivo.value = '';
     mostrarJustificativa();
 
+    prepararEncerramento(os);
     preencherTalhoes(os.talhoes, listas.fazendas);   // depois da fazenda: os talhões dependem dela
     preencherEquipamentos(os.equipamentos, listas.equipamentos);
     preencherInsumos(os, listas.insumos);
@@ -106,6 +109,24 @@ function prepararModo(lancada) {
         campo.querySelector('input').disabled = !lancada;
     }
     avisarApontado();
+}
+
+// Apontamento em análise: a caixa "encerra a OS" (marca se o líder esqueceu, desmarca se foi engano)
+function prepararEncerramento(os) {
+    const ehApontamento = os.tipo_registro !== 'LANCAMENTO' && os.status_aprovacao === 'Em análise';
+    campoEncerra.hidden = !ehApontamento;
+    if (!ehApontamento) return;
+
+    const encerra = os.tipo_registro === 'ENCERRAMENTO';
+    const ordem = montarOrdens(estado.lista).find(o => o.abertura.codigoTemp === os.os_origem);
+    const jaEncerrada = !encerra && ordem !== undefined && ordem.situacao === 'encerrada';
+    checkEncerra.checked = encerra;
+    checkEncerra.disabled = jaEncerrada;   // outro encerramento já foi lançado: não dá para marcar
+    document.getElementById('editar-encerra-dica').textContent = jaEncerrada
+        ? 'A OS já está encerrada por outro encerramento lançado.'
+        : encerra
+            ? 'O responsável marcou para encerrar. Desmarque se foi engano: vira apontamento comum e a OS continua aberta.'
+            : 'O responsável não marcou. Marque se este é o último apontamento: ao lançar, a OS fica encerrada.';
 }
 
 // "10577, 10578" ou "10577;10578" → ['10577', '10578'] (sem repetir)
@@ -176,6 +197,7 @@ function lerFormulario() {
     valores.equipamentos = textoDosEquipamentos();
     valores.insumos = resumoDosInsumos();
     if ('codigo_os' in valores) valores.codigo_os = numerosDoTexto(valores.codigo_os).join(';');
+    if (!campoEncerra.hidden) valores.tipo_registro = checkEncerra.checked ? 'ENCERRAMENTO' : 'APONTAMENTO';
     return valores;
 }
 

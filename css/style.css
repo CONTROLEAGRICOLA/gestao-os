@@ -1769,3 +1769,47 @@ textarea {
         padding-bottom: 76px;
     }
 }
+
+
+/* ===================== ENCERRAR / REABRIR A OS ===================== */
+/* Caixa do Editar (apontamento em análise) */
+.caixa-encerrar {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 12px 14px;
+    border: 1px solid var(--vermelho);
+    border-radius: var(--raio);
+    background: #FDF3F2;
+}
+
+.linha-encerrar {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    color: var(--vermelho);
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.linha-encerrar input {
+    width: 18px;
+    height: 18px;
+    margin: 0;
+    accent-color: var(--vermelho);
+}
+
+.caixa-encerrar small {
+    color: var(--texto-suave);
+}
+
+/* Botão "Encerrar OS" do cabeçalho da OS */
+.link-botao.perigo {
+    color: var(--vermelho);
+}
+
+/* Texto da janela de encerrar/reabrir */
+.encerrar-texto {
+    margin: 0;
+    line-height: 1.5;
+}

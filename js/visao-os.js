@@ -8,6 +8,7 @@ import { bloco, campo } from './detalhe.js';
 import { criar, formatarHa, formatarPeriodo, dataCurta, lerDataBR, lerTalhoes, lerEquipamentos, numeroBR, semAcento, NOMES_DOS_TIPOS, redesenhar } from './util.js';
 import { abrirTrocaPDF } from './acoes-os.js';
 import { abrirEdicao } from './edicao.js';
+import { abrirEncerramento } from './encerrar.js';
 
 // Como a situação de um apontamento aparece na ficha
 const SITUACAO_DO_APONTAMENTO = {
@@ -173,8 +174,20 @@ function cabecalhoDaFicha(ordem) {
         editar.dataset.editar = os.codigoTemp;
         acoes.append(botaoPDF(os), editar);
     }
+    // Encerrar (OS aberta ou em execução, sem encerramento esperando) ou reabrir (encerrada)
+    if (ordem.situacao === 'aberta' || ordem.situacao === 'execucao') acoes.append(botaoEncerrar(os.codigoTemp, true));
+    if (ordem.situacao === 'encerrada') acoes.append(botaoEncerrar(os.codigoTemp, false));
     if (acoes.children.length > 0) caixa.append(acoes);
     return caixa;
+}
+
+// Botão que abre a janela de encerrar (ou de reabrir) a OS
+function botaoEncerrar(codigoTemp, encerrar) {
+    const botao = criar('button', encerrar ? 'link-botao perigo' : 'link-botao', encerrar ? '🔒 Encerrar OS' : '🔓 Reabrir OS');
+    botao.type = 'button';
+    if (encerrar) botao.dataset.encerrar = codigoTemp;
+    else botao.dataset.reabrir = codigoTemp;
+    return botao;
 }
 
 // Botão que abre a janela de trocar (ou anexar) o PDF
@@ -349,6 +362,11 @@ export function iniciarVisaoOS() {
 
         const editar = evento.target.closest('[data-editar]');
         if (editar) abrirEdicao(editar.dataset.editar);
+
+        const encerrar = evento.target.closest('[data-encerrar]');
+        if (encerrar) abrirEncerramento(encerrar.dataset.encerrar, true);
+        const reabrir = evento.target.closest('[data-reabrir]');
+        if (reabrir) abrirEncerramento(reabrir.dataset.reabrir, false);
     });
 
 

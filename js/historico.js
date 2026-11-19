@@ -13,7 +13,9 @@ const TITULOS = {
     'TROCOU PDF': 'PDF trocado',
     'EDITOU': 'Editada pelo analista',
     'CANCELOU': 'Cancelada',
-    'VOLTOU PARA ANÁLISE': 'Voltou para análise'
+    'VOLTOU PARA ANÁLISE': 'Voltou para análise',
+    'ENCERROU A OS': 'OS encerrada pelo controle',
+    'REABRIU A OS': 'OS reaberta pelo controle'
 };
 
 let pedidoAtual = 0;   // para ignorar resposta de uma OS que já não está aberta
@@ -60,6 +62,10 @@ function evento(registro) {
 
     if ((registro.acao === 'REJEITOU' || registro.acao === 'CANCELOU') && registro.depois) {
         item.append(criar('span', 'evento-detalhe', registro.depois));
+    }
+
+    if ((registro.acao === 'ENCERROU A OS' || registro.acao === 'REABRIU A OS') && registro.depois) {
+        item.append(criar('span', 'evento-detalhe', 'Motivo: ' + registro.depois));
     }
     if (registro.acao === 'EDITOU') {
         for (const m of registro.mudancas) {

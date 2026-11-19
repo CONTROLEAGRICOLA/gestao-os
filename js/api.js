@@ -91,6 +91,17 @@ export function voltarParaAnalise(codigoTemp, analista) {
     return enviar({ action: 'voltar_analise', codigoTemp, analista });
 }
 
+
+// Encerrar a OS pelo controle: o último apontamento lançado passa a ser o encerramento
+export function encerrarOS(codigoTemp, motivo, analista) {
+    return enviar({ action: 'encerrar_os', codigoTemp, motivo, analista });
+}
+
+// Reabrir a OS: o encerramento lançado volta a ser apontamento
+export function reabrirOS(codigoTemp, motivo, analista) {
+    return enviar({ action: 'reabrir_os', codigoTemp, motivo, analista });
+}
+
 // Só vai o que mudou. Se "produtos" não for passado, os insumos ficam como estão.
 export function editarOS(codigoTemp, analista, dados, produtos, motivo = '') {
     return enviar({ action: 'editar_analista', codigoTemp, analista, dados, produtos, motivo });
