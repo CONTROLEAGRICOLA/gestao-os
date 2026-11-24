@@ -1813,3 +1813,277 @@ textarea {
     margin: 0;
     line-height: 1.5;
 }
+
+/* ===================== PROGRAMAÇÃO DA SEMANA ===================== */
+.programacao-arquivo {
+    margin-top: 14px;
+}
+
+.programacao-resumo {
+    margin-top: 12px;
+}
+
+.programacao-titulo {
+    margin: 0 0 8px;
+    font-size: 13px;
+}
+
+.programacao-ordens {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    max-height: 40vh;
+    overflow-y: auto;
+}
+
+.programacao-ordem {
+    display: grid;
+    grid-template-columns: 110px minmax(0, 1.4fr) minmax(0, 1.2fr) minmax(0, 1fr);
+    gap: 10px;
+    padding: 7px 10px;
+    background: var(--fundo);
+    border-radius: 8px;
+    font-size: 13px;
+}
+
+.programacao-op {
+    color: var(--azul);
+    font-weight: 600;
+}
+
+.programacao-faz {
+    font-weight: 600;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.programacao-quem {
+    color: var(--texto-suave);
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.programacao-avisos-titulo {
+    margin: 12px 0 4px;
+    color: var(--ambar);
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.programacao-avisos {
+    margin: 0;
+    padding-left: 18px;
+    color: var(--ambar);
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+
+/* ===================== FERRAMENTAS (menu do botão flutuante) ===================== */
+/* Fundo escurecido atrás do menu (clicar nele fecha) */
+.ferramentas::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 18;
+    background: rgba(23, 32, 26, 0.32);
+    backdrop-filter: blur(2px);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.25s ease, visibility 0s linear 0.25s;
+}
+
+.ferramentas.aberto::before {
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.25s ease;
+}
+
+/* O botão: afunda um pouco no clique; aberto, fica firme e sem o texto */
+.botao-flutuante {
+    transition: opacity 0.2s, box-shadow 0.2s, transform 0.15s;
+}
+
+.botao-flutuante:active {
+    transform: scale(0.94);
+}
+
+.ferramentas.aberto .botao-flutuante {
+    opacity: 1;
+}
+
+.ferramentas.aberto .botao-flutuante-texto {
+    max-width: 0;
+    margin-left: 0;
+    opacity: 0;
+}
+
+/* Ícone ☰ feito com 3 tracinhos: aberto, o de cima e o de baixo giram e viram ✕ */
+.icone-hamburguer {
+    position: relative;
+    flex-shrink: 0;
+    width: 20px;
+    height: 14px;
+}
+
+.icone-hamburguer i {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: currentColor;
+    border-radius: 2px;
+    transition: transform 0.35s cubic-bezier(0.65, 0, 0.35, 1), opacity 0.2s ease;
+}
+
+.icone-hamburguer i:nth-child(1) {
+    top: 0;
+}
+
+.icone-hamburguer i:nth-child(2) {
+    top: 6px;
+}
+
+.icone-hamburguer i:nth-child(3) {
+    top: 12px;
+}
+
+.ferramentas.aberto .icone-hamburguer i:nth-child(1) {
+    transform: translateY(6px) rotate(45deg);
+}
+
+.ferramentas.aberto .icone-hamburguer i:nth-child(2) {
+    opacity: 0;
+    transform: scaleX(0);
+}
+
+.ferramentas.aberto .icone-hamburguer i:nth-child(3) {
+    transform: translateY(-6px) rotate(-45deg);
+}
+
+/* Cada ferramenta vira uma bolinha com o nome do lado, empilhadas em cima do botão */
+.ferramentas-menu {
+    position: fixed;
+    right: 28px;
+    bottom: 92px;
+    z-index: 21;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 12px;
+    visibility: hidden;
+    transition: visibility 0s linear 0.25s;
+}
+
+.ferramentas.aberto .ferramentas-menu {
+    visibility: visible;
+    transition: none;
+}
+
+.ferramentas-titulo {
+    display: none;
+}
+
+.ferramenta {
+    display: flex;
+    flex-direction: row-reverse;
+    align-items: center;
+    gap: 12px;
+    padding: 0;
+    background: transparent;
+    color: var(--texto);
+    border: 0;
+    font: inherit;
+    cursor: pointer;
+    opacity: 0;
+    transform: translateY(16px) scale(0.8);
+    transform-origin: right center;
+    transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.ferramentas.aberto .ferramenta {
+    opacity: 1;
+    transform: none;
+    transition: opacity 0.25s ease, transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* De baixo para cima: a mais perto do botão sai primeiro */
+.ferramentas.aberto .ferramenta:nth-last-of-type(1) {
+    transition-delay: 0.03s;
+}
+
+.ferramentas.aberto .ferramenta:nth-last-of-type(2) {
+    transition-delay: 0.08s;
+}
+
+.ferramentas.aberto .ferramenta:nth-last-of-type(3) {
+    transition-delay: 0.13s;
+}
+
+.ferramentas.aberto .ferramenta:nth-last-of-type(4) {
+    transition-delay: 0.18s;
+}
+
+.ferramentas.aberto .ferramenta:nth-last-of-type(5) {
+    transition-delay: 0.23s;
+}
+
+.ferramenta svg {
+    flex-shrink: 0;
+    box-sizing: content-box;
+    padding: 12px;
+    background: var(--superficie);
+    color: var(--verde);
+    border-radius: 50%;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18);
+    transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.ferramenta>span {
+    padding: 8px 14px;
+    background: var(--superficie);
+    border-radius: 12px;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.14);
+    text-align: left;
+}
+
+.ferramenta:focus-visible {
+    outline: none;
+}
+
+.ferramenta:hover svg,
+.ferramenta:focus-visible svg {
+    background: var(--verde);
+    color: #FFFFFF;
+    transform: scale(1.08);
+}
+
+.ferramenta:focus-visible>span {
+    outline: 2px solid var(--verde);
+}
+
+.ferramenta strong {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.ferramenta small {
+    display: block;
+    margin-top: 2px;
+    color: var(--texto-suave);
+    font-size: 12px;
+}
+
+/* Quem pediu no Windows para reduzir animações: abre e fecha na hora */
+@media (prefers-reduced-motion: reduce) {
+
+    .ferramentas::before,
+    .ferramentas *,
+    .ferramentas *::after {
+        transition-duration: 0.01s !important;
+        transition-delay: 0s !important;
+    }
+}

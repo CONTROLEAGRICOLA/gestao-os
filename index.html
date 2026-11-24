@@ -35,15 +35,36 @@
                 Usuário: <strong id="eu-sou-nome">—</strong>
             </button>
 
-            <!-- Botão flutuante: só o ícone; com o mouse em cima, mostra o texto -->
-            <button type="button" id="btn-relatorios" class="botao-flutuante" aria-label="Enviar relatórios">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                    stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <path d="M22 2 11 13"></path>
-                    <path d="M22 2 15 22 11 13 2 9 22 2z"></path>
-                </svg>
-                <span class="botao-flutuante-texto">Enviar relatórios</span>
-            </button>
+            <!-- Ferramentas: o botão flutuante abre o menu (ferramenta nova = mais um <button class="ferramenta">) -->
+            <div class="ferramentas" id="ferramentas">
+                <button type="button" id="btn-ferramentas" class="botao-flutuante" aria-label="Ferramentas"
+                    aria-expanded="false" aria-controls="ferramentas-menu">
+                    <span class="icone-hamburguer" aria-hidden="true"><i></i><i></i><i></i></span>
+                    <span class="botao-flutuante-texto">Ferramentas</span>
+                </button>
+
+                <div class="ferramentas-menu" id="ferramentas-menu" hidden>
+                    <p class="ferramentas-titulo">Ferramentas</p>
+
+                    <button type="button" class="ferramenta" id="btn-relatorios">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M22 2 11 13"></path>
+                            <path d="M22 2 15 22 11 13 2 9 22 2z"></path>
+                        </svg>
+                        <span><strong>Enviar relatórios</strong><small>Disponibilizar os relatórios</small></span>
+                    </button>
+
+                    <button type="button" class="ferramenta" id="btn-programacao">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <rect x="3" y="4" width="18" height="18" rx="2"></rect>
+                            <path d="M16 2v4M8 2v4M3 10h18"></path>
+                        </svg>
+                        <span><strong>Programação da semana</strong><small>Subir o .xlsx com as áreas programadas</small></span>
+                    </button>
+                </div>
+            </div>
 
             <button type="button" id="btn-sino" class="botao-icone" aria-label="Notificações">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -319,8 +340,7 @@
             <!-- Só na OS lançada: vai para o histórico e para o aviso do líder -->
             <!-- Só na OS lançada: vai para o histórico e para o aviso do líder -->
             <label class="campo-form inteiro" id="campo-motivo" hidden>Motivo da alteração (opcional)
-                <input name="motivo" autocomplete="off"
-                    placeholder="Ex.: Acrescentado talhão 1">
+                <input name="motivo" autocomplete="off" placeholder="Ex.: Acrescentado talhão 1">
             </label>
 
             <p class="alerta inteiro" id="editar-erro"></p>
@@ -365,6 +385,26 @@
                 <button type="submit" class="botao-perigo" id="encerrar-botao">Encerrar a OS</button>
             </div>
         </form>
+    </dialog>
+
+    <!-- Programação da semana (sobe toda quinta; substitui a anterior) -->
+    <dialog id="dialogo-programacao" class="dialogo dialogo-largo">
+        <h2 class="dialogo-titulo">Programação da semana</h2>
+        <p class="dica" id="programacao-atual"></p>
+
+        <label class="arquivo programacao-arquivo">
+            <input type="file" id="programacao-arquivo" accept=".xlsx">
+            <strong>Escolher o arquivo da programação (.xlsx)</strong>
+            <span>clique ou arraste aqui · a programação nova substitui a anterior</span>
+        </label>
+
+        <div class="programacao-resumo" id="programacao-resumo"></div>
+        <p class="alerta" id="programacao-erro"></p>
+
+        <div class="dialogo-botoes">
+            <button type="button" class="botao-secundario" id="programacao-fechar">Fechar</button>
+            <button type="button" class="botao-principal" id="programacao-enviar" disabled>Enviar programação</button>
+        </div>
     </dialog>
     <dialog id="dialogo-relatorios" class="dialogo dialogo-largo">
         <h2 class="dialogo-titulo">Enviar relatórios aos responsáveiss</h2>

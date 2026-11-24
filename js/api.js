@@ -91,6 +91,16 @@ export function voltarParaAnalise(codigoTemp, analista) {
     return enviar({ action: 'voltar_analise', codigoTemp, analista });
 }
 
+// Programação da semana: manda as linhas já lidas do .xlsx (substitui a anterior)
+export function enviarProgramacao(linhas, analista) {
+    return enviar({ action: 'enviar_programacao', linhas, analista }, 120);
+}
+
+// De quando é a programação que está valendo, quem enviou e quem faz cada operação
+export async function infoProgramacao() {
+    const json = await pedir('info_programacao', {}, 30);
+    return json.dados;
+}
 
 // Encerrar a OS pelo controle: o último apontamento lançado passa a ser o encerramento
 export function encerrarOS(codigoTemp, motivo, analista) {

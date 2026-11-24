@@ -9,6 +9,8 @@ import { iniciarVisaoOS } from './visao-os.js';
 import './usuario.js';   // liga o "Eu sou"
 import './edicao.js';  // liga a edição pelo analista
 import './relatorios.js';  // liga o envio de relatórios aos líderes
+import './programacao.js';  // liga o envio da programação da semana
+import './ferramentas.js';  // o botão flutuante que abre o menu de ferramentas
 import { semAcento } from './util.js';
 import { estado } from './estado.js';
 import { desenharHistorico } from './historico.js';
