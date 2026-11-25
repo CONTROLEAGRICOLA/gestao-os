@@ -51,12 +51,12 @@ async function abrir() {
 
 // O que está valendo, quem faz cada operação e as listas do app
 async function carregar() {
-    atual.textContent = 'Vendo qual programação está valendo…';
+    atual.textContent = 'Vendo qual foi a ultima programação enviada…';
     try {
         const info = await infoProgramacao();
         lideres = info.lideres || null;
         atual.textContent = info.enviadaEm
-            ? `Valendo agora: enviada em ${new Date(info.enviadaEm).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })} por ${info.enviadaPor || '—'} (${info.linhas} linhas).`
+            ? `Ultima programação: enviada em ${new Date(info.enviadaEm).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })} por ${info.enviadaPor || '—'} (${info.linhas} linhas).`
             : 'Ainda não tem nenhuma programação enviada.';
     } catch (falha) {
         atual.textContent = '';
