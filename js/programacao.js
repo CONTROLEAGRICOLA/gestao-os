@@ -25,9 +25,9 @@ const COLUNAS = {
     'SEQ': 'SEQ', 'OPERACAO': 'OPERACAO', 'DESCRICAO OPERACAO': 'DESCRICAO_OPERACAO',
     'CENTRO DE CUSTO': 'CENTRO_CUSTO', 'F.A': 'FA', 'DESCRICAO FAZENDA': 'FAZENDA', 'TALHAO': 'TALHAO',
     'AREA A REALIZAR': 'AREA', 'COD INSUMO': 'COD_INSUMO', 'INSUMO': 'INSUMO', 'DOSE': 'DOSE',
-    'UNIDADE': 'UNIDADE', 'FORA DA FAIXA': 'FORA_DA_FAIXA', 'STATUS': 'STATUS'
+    'UNIDADE': 'UNIDADE', 'FORA DA FAIXA': 'FORA_DA_FAIXA', 'SITUACAO COLHEITA': 'STATUS'
 };
-const OPCIONAIS = ['FORA DA FAIXA', 'STATUS'];   // se faltar, vai vazio
+const OPCIONAIS = ['FORA DA FAIXA'];   // se faltar, vai vazio
 
 let linhas = [];    // o que vai para o servidor (uma por operação × fazenda × talhão × insumo)
 let lideres = null; // { '1046': ['AIRTON ...', ...] } da aba LIDER X OPERACAO (null = não deu para ver)
