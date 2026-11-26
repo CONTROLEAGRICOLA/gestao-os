@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
-    <link rel="stylesheet" href="css/style.css?v=9">
+    <link rel="stylesheet" href="css/style.css?v=10">
 </head>
 
 <body>
@@ -66,7 +66,19 @@
                     </button>
                 </div>
             </div>
-
+            <!-- Anotações da equipe: recados entre os analistas (os líderes não veem) -->
+            <button type="button" id="btn-anotacoes" class="botao-anotacoes" aria-expanded="false"
+                aria-controls="anotacoes">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M12 17v5"></path>
+                    <path d="M9 10.76V6h6v4.76l2.5 2.74H6.5z"></path>
+                    <path d="M8 3h8"></path>
+                </svg>
+                Anotações
+                <span class="contador" id="anotacoes-contador" hidden>0</span>
+                <i class="anotacoes-nova" id="anotacoes-nova" title="Tem anotação nova" hidden></i>
+            </button>
             <button type="button" id="btn-sino" class="botao-icone" aria-label="Notificações">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                     stroke-linecap="round" aria-hidden="true">
@@ -428,6 +440,46 @@
             <button type="button" class="botao-principal" id="relatorios-enviar" disabled>Enviar</button>
         </div>
     </dialog>
+
+    <!-- Anotações da equipe: gaveta que abre pela direita -->
+    <div class="anotacoes-fundo" id="anotacoes-fundo" hidden></div>
+    <aside class="anotacoes" id="anotacoes" aria-labelledby="anotacoes-titulo" hidden>
+        <header class="anotacoes-topo">
+            <div>
+                <h2 id="anotacoes-titulo">Anotações da equipe</h2>
+                <p>Deixe alguma anotação</p>
+            </div>
+            <button type="button" class="anotacoes-fechar" id="anotacoes-fechar" aria-label="Fechar">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" aria-hidden="true">
+                    <path d="M6 6l12 12M18 6 6 18"></path>
+                </svg>
+            </button>
+        </header>
+
+        <form class="anotacoes-escrever" id="anotacoes-escrever">
+            <textarea id="anotacoes-texto" maxlength="1000" placeholder="Escrever uma anotação para a equipe…"
+                aria-label="Nova anotação"></textarea>
+            <div class="anotacoes-escrever-rodape">
+                <label class="anotacoes-fixar"><input type="checkbox" id="anotacoes-fixar"> Fixar no topo</label>
+                <span class="anotacoes-letras" id="anotacoes-letras"></span>
+                <button type="submit" class="botao-principal" id="anotacoes-publicar" disabled>Publicar</button>
+            </div>
+        </form>
+
+        <nav class="anotacoes-abas" aria-label="Quais anotações">
+            <button type="button" class="anotacoes-aba ativa" data-lista="abertas">
+                Abertas <span class="contador" id="anotacoes-cont-abertas">0</span>
+            </button>
+            <button type="button" class="anotacoes-aba" data-lista="concluidas">
+                Concluídas <span class="contador" id="anotacoes-cont-concluidas">0</span>
+            </button>
+        </nav>
+
+        <div class="anotacoes-lista" id="lista-abertas"></div>
+        <div class="anotacoes-lista" id="lista-concluidas" hidden></div>
+    </aside>
+
     <div id="carregando" class="carregando" role="status" hidden>
         <span class="carregando-roda" aria-hidden="true"></span>
         <span>Atualizando as solicitações…</span>

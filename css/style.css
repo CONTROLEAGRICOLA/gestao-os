@@ -2151,3 +2151,394 @@ textarea {
         transition-delay: 0s !important;
     }
 }
+
+
+/* ===================== ANOTAÇÕES DA EQUIPE ===================== */
+/* Botão no topo: alfinete, quantas abertas e bolinha quando tem anotação nova de outra pessoa */
+.botao-anotacoes {
+    position: relative;
+    height: 40px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 12px 0 14px;
+    background: var(--superficie);
+    border: 1px solid var(--borda-forte);
+    border-radius: 999px;
+    color: var(--texto);
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.botao-anotacoes:hover,
+.botao-anotacoes[aria-expanded="true"] {
+    background: var(--fundo);
+}
+
+.botao-anotacoes svg {
+    color: var(--ambar);
+}
+
+.botao-anotacoes .contador {
+    background: var(--texto);
+    color: var(--superficie);
+}
+
+.botao-anotacoes .contador[hidden] {
+    display: none;
+}
+
+.anotacoes-nova {
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #E8A317;
+    border: 2px solid var(--superficie);
+}
+
+/* Fundo levemente escurecido atrás da gaveta (clicar fecha) */
+.anotacoes-fundo {
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+    background: rgba(23, 32, 26, 0.16);
+}
+
+/* A gaveta: entra pela direita, na altura toda */
+.anotacoes {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 41;
+    width: 440px;
+    max-width: 100vw;
+    display: flex;
+    flex-direction: column;
+    background: var(--fundo);
+    border-left: 1px solid var(--borda);
+    box-shadow: -12px 0 32px rgba(23, 32, 26, 0.12);
+}
+
+.anotacoes[hidden],
+.anotacoes-fundo[hidden] {
+    display: none;
+}
+
+/* O aviso do canto (mostrarAviso) fica por cima da gaveta */
+.aviso {
+    z-index: 50;
+}
+
+.anotacoes-topo {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 20px 20px 16px;
+    background: var(--superficie);
+    border-bottom: 1px solid var(--borda);
+}
+
+.anotacoes-topo h2 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.anotacoes-topo p {
+    margin: 4px 0 0;
+    font-size: 12px;
+    color: var(--texto-suave);
+}
+
+.anotacoes-fechar {
+    margin-left: auto;
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: 0;
+    border-radius: 8px;
+    color: var(--texto-suave);
+    cursor: pointer;
+}
+
+.anotacoes-fechar:hover {
+    background: var(--fundo);
+}
+
+/* Escrever */
+.anotacoes-escrever {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 16px 20px;
+    background: var(--superficie);
+    border-bottom: 1px solid var(--borda);
+}
+
+.anotacoes-escrever textarea,
+.anotacao-editar {
+    width: 100%;
+    min-height: 76px;
+    padding: 10px 12px;
+    box-sizing: border-box;
+    resize: vertical;
+    background: var(--fundo);
+    border: 1px solid var(--borda);
+    border-radius: var(--raio);
+    font: inherit;
+    font-size: 14px;
+    line-height: 1.45;
+    color: var(--texto);
+}
+
+.anotacoes-escrever textarea:focus,
+.anotacao-editar:focus {
+    outline: 2px solid var(--verde);
+    background: var(--superficie);
+}
+
+.anotacoes-escrever-rodape {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.anotacoes-fixar {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--texto-medio);
+    cursor: pointer;
+}
+
+.anotacoes-fixar input {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--ambar);
+}
+
+.anotacoes-letras {
+    margin-left: auto;
+    font-size: 12px;
+    color: var(--texto-suave);
+}
+
+.anotacoes-escrever .botao-principal {
+    height: 38px;
+    padding: 0 18px;
+}
+
+.anotacoes-letras:empty+.botao-principal {
+    margin-left: auto;
+}
+
+/* Abertas / Concluídas */
+.anotacoes-abas {
+    display: flex;
+    gap: 4px;
+    margin: 14px 20px 4px;
+    padding: 4px;
+    background: var(--superficie);
+    border: 1px solid var(--borda);
+    border-radius: 12px;
+}
+
+.anotacoes-aba {
+    flex: 1;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: transparent;
+    border: 0;
+    border-radius: 9px;
+    color: var(--texto-medio);
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.anotacoes-aba:hover {
+    background: var(--fundo);
+}
+
+.anotacoes-aba.ativa {
+    background: var(--texto);
+    color: var(--superficie);
+}
+
+.anotacoes-aba.ativa .contador {
+    background: rgba(255, 255, 255, 0.18);
+}
+
+.anotacoes-lista {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 10px 20px 24px;
+}
+
+.anotacoes-lista[hidden] {
+    display: none;
+}
+
+.anotacoes-vazio,
+.anotacoes-rodape {
+    margin: 16px 0 0;
+    font-size: 13px;
+    color: var(--texto-suave);
+    text-align: center;
+}
+
+/* Cada anotação */
+.anotacao {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 14px 16px 12px;
+    background: var(--superficie);
+    border: 1px solid var(--borda);
+    border-radius: var(--raio);
+}
+
+.anotacao-fixada {
+    background: #FFF8EC;
+    border-color: #F1D9AE;
+}
+
+.anotacao-cabeca {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.anotacao-avatar {
+    width: 30px;
+    height: 30px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: #E6F0EA;
+    color: var(--verde);
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.anotacao-quem {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.25;
+}
+
+.anotacao-quem strong {
+    font-size: 13px;
+}
+
+.anotacao-quem span {
+    font-size: 12px;
+    color: var(--texto-suave);
+}
+
+.anotacao-etiqueta {
+    margin-left: auto;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+}
+
+.etiqueta-fixada {
+    background: #FBE9C8;
+    color: var(--ambar);
+}
+
+.etiqueta-nova {
+    background: #E3EDF8;
+    color: var(--azul);
+}
+
+.anotacao-texto {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--texto);
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.anotacao-acoes {
+    display: flex;
+    gap: 6px;
+    margin-top: 2px;
+}
+
+.anotacao-acao {
+    height: 30px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 10px;
+    background: transparent;
+    border: 1px solid var(--borda-forte);
+    border-radius: 8px;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--texto-medio);
+    cursor: pointer;
+}
+
+.anotacao-acao:hover {
+    background: var(--fundo);
+}
+
+.anotacao-acao.concluir:hover {
+    border-color: var(--verde);
+    color: var(--verde);
+    background: #E6F0EA;
+}
+
+.anotacao-acao.principal {
+    background: var(--verde);
+    border-color: var(--verde);
+    color: #FFFFFF;
+}
+
+.anotacao-acao:disabled {
+    opacity: 0.5;
+    cursor: default;
+}
+
+/* Concluídas: apagadinhas, com quando foi concluída */
+.anotacao-concluida {
+    background: transparent;
+}
+
+.anotacao-concluida .anotacao-texto {
+    color: var(--texto-suave);
+}
+
+.anotacao-concluida-por {
+    font-size: 12px;
+    color: var(--verde);
+    font-weight: 600;
+}

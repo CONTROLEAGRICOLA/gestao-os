@@ -56,7 +56,18 @@ export async function buscarListas() {
     return json.dados;
 }
 
+// As anotações da equipe: { abertas, concluidas, totalConcluidas }
+export async function buscarAnotacoes() {
+    const json = await pedir('anotacoes');
+    return json.dados;
+}
+
 // ---------- Envios (gravam na planilha) ----------
+
+// Anotações: acao = 'criar', 'concluir', 'reabrir', 'fixar' ou 'editar'. Vai junto quem está usando o painel.
+export function anotacao(acao, dados, eu) {
+    return enviar({ action: 'anotacao_' + acao, ...dados, autorId: eu.id, autorNome: eu.nome });
+}
 
 // Manda uma ação para o Apps Script (POST) e devolve a resposta já em objeto
 async function enviar(dados, segundos = 60) {
