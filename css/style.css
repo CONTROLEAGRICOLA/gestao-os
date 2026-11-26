@@ -1880,6 +1880,67 @@ textarea {
     line-height: 1.5;
 }
 
+/* Talhões em colheita (ordem de corte aberta), na janela da programação */
+.programacao-colheita {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 12px;
+    padding: 14px 16px;
+    background: #FFF8EC;
+    border: 1px solid #F1D9AE;
+    border-radius: var(--raio);
+}
+
+.programacao-colheita-titulo {
+    margin: 0;
+    color: var(--ambar);
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.programacao-colheita-dica {
+    margin: -6px 0 0;
+    color: var(--texto-suave);
+    font-size: 12px;
+}
+
+.programacao-colheita-faz {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 13px;
+}
+
+.programacao-colheita-talhoes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.programacao-colheita-talhao {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 34px;
+    padding: 0 12px;
+    background: var(--superficie);
+    border: 1px solid var(--borda-forte);
+    border-radius: 999px;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.programacao-colheita-talhao:has(input:checked) {
+    background: #E6F0EA;
+    border-color: var(--verde);
+}
+
+.programacao-colheita .botao-secundario {
+    align-self: flex-start;
+    padding: 0 16px;
+}
+
 /* ===================== FERRAMENTAS (menu do botão flutuante) ===================== */
 /* Fundo invisível atrás do menu: clicar fora só fecha o menu (não clica no que está embaixo) */
 .ferramentas::before {

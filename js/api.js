@@ -96,6 +96,11 @@ export function enviarProgramacao(linhas, analista) {
     return enviar({ action: 'enviar_programacao', linhas, analista }, 120);
 }
 
+// A ordem de corte encerrou: libera os talhões da programação (apaga o STATUS "em colheita")
+export function liberarTalhoes(talhoes, analista) {
+    return enviar({ action: 'liberar_talhoes', talhoes, analista });
+}
+
 // De quando é a programação que está valendo, quem enviou e quem faz cada operação
 export async function infoProgramacao() {
     const json = await pedir('info_programacao', {}, 30);

@@ -4,7 +4,7 @@
 // o servidor só guarda. O envio novo substitui o anterior.
 // Quem vê cada ordem vem da aba LIDER X OPERACAO da planilha (aqui só mostra).
 // =============================================================
-import { enviarProgramacao, infoProgramacao, buscarListas } from './api.js';
+import { enviarProgramacao, infoProgramacao, buscarListas, liberarTalhoes } from './api.js';
 import { quemSouEu } from './usuario.js';
 import { criar, mostrarAviso, formatarHa } from './util.js';
 import { lerXlsx } from './ler-xlsx.js';
@@ -15,6 +15,7 @@ const atual = document.getElementById('programacao-atual');
 const resumo = document.getElementById('programacao-resumo');
 const erro = document.getElementById('programacao-erro');
 const botaoEnviar = document.getElementById('programacao-enviar');
+const colheita = document.getElementById('programacao-colheita');
 
 // A aba do arquivo que tem a programação (nome sem acento, em maiúsculas)
 const ABA = 'RECOMENDACOES LINHA A LINHA';
@@ -24,9 +25,9 @@ const COLUNAS = {
     'SEQ': 'SEQ', 'OPERACAO': 'OPERACAO', 'DESCRICAO OPERACAO': 'DESCRICAO_OPERACAO',
     'CENTRO DE CUSTO': 'CENTRO_CUSTO', 'F.A': 'FA', 'DESCRICAO FAZENDA': 'FAZENDA', 'TALHAO': 'TALHAO',
     'AREA A REALIZAR': 'AREA', 'COD INSUMO': 'COD_INSUMO', 'INSUMO': 'INSUMO', 'DOSE': 'DOSE',
-    'UNIDADE': 'UNIDADE', 'FORA DA FAIXA': 'FORA_DA_FAIXA'
+    'UNIDADE': 'UNIDADE', 'FORA DA FAIXA': 'FORA_DA_FAIXA', 'STATUS': 'STATUS'
 };
-const OPCIONAIS = ['FORA DA FAIXA'];   // se faltar, vai vazio
+const OPCIONAIS = ['FORA DA FAIXA', 'STATUS'];   // se faltar, vai vazio
 
 let linhas = [];    // o que vai para o servidor (uma por operação × fazenda × talhão × insumo)
 let lideres = null; // { '1046': ['AIRTON ...', ...] } da aba LIDER X OPERACAO (null = não deu para ver)
@@ -55,6 +56,7 @@ async function carregar() {
     try {
         const info = await infoProgramacao();
         lideres = info.lideres || null;
+        desenharColheita(info.emColheita || []);
         atual.textContent = info.enviadaEm
             ? `Ultima programação: enviada em ${new Date(info.enviadaEm).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })} por ${info.enviadaPor || '—'} (${info.linhas} linhas).`
             : 'Ainda não tem nenhuma programação enviada.';
@@ -80,6 +82,7 @@ function limpar() {
 // ---------- Ler o arquivo ----------
 async function lerArquivo(arquivo) {
     limpar();
+    colheita.hidden = true;   // o arquivo novo vai substituir tudo, inclusive os status
     if (!/\.xlsx$/i.test(arquivo.name)) {
         erro.textContent = 'Escolha o arquivo .xlsx da programação.';
         return;
@@ -172,28 +175,32 @@ function desenharResumo(nomeArquivo, avisos) {
     const ordens = new Map();
     for (const l of linhas) {
         const chave = l.OPERACAO + '|' + l.FA + '|' + l.CENTRO_CUSTO;
-        if (!ordens.has(chave)) ordens.set(chave, { l, talhoes: new Map() });
+        if (!ordens.has(chave)) ordens.set(chave, { l, talhoes: new Map(), emColheita: new Set() });
         ordens.get(chave).talhoes.set(String(l.TALHAO), Number(l.AREA) || 0);
+        if (String(l.STATUS ?? '').trim()) ordens.get(chave).emColheita.add(String(l.TALHAO));
     }
     const fazendas = new Set(linhas.map(l => l.FA)).size;
     const operacoes = new Set(linhas.map(l => l.OPERACAO)).size;
     const quantosLideres = new Set([...new Set(linhas.map(l => l.OPERACAO))].flatMap(quemFaz)).size;
+    const totalColheita = new Set(linhas.filter(l => String(l.STATUS ?? '').trim()).map(l => l.FA + '|' + l.TALHAO)).size;
 
     const titulo = criar('p', 'programacao-titulo');
     const plural = (n, um, varios) => `${n} ${n === 1 ? um : varios}`;
     titulo.append(criar('strong', '', nomeArquivo),
         ` · ${plural(ordens.size, 'ordem', 'ordens')} · ${plural(operacoes, 'operação', 'operações')} · ${plural(fazendas, 'fazenda', 'fazendas')}`
-        + (quantosLideres ? ` · ${plural(quantosLideres, 'líder', 'líderes')}` : ''));
+        + (quantosLideres ? ` · ${plural(quantosLideres, 'líder', 'líderes')}` : '')
+        + (totalColheita ? ` · ${totalColheita} em colheita` : ''));
 
     const tabela = criar('div', 'programacao-ordens');
-    for (const { l, talhoes } of ordens.values()) {
+    for (const { l, talhoes, emColheita } of ordens.values()) {
         const quem = quemFaz(l.OPERACAO);
         const area = [...talhoes.values()].reduce((s, a) => s + a, 0);
         const linha = criar('div', 'programacao-ordem');
         linha.append(
             criar('span', 'programacao-op', `${l.SEQ}ª · ${l.OPERACAO}`),
             criar('span', 'programacao-faz', l.FAZENDA),
-            criar('span', '', `CC ${l.CENTRO_CUSTO} · ${talhoes.size === 1 ? 'Talhão' : 'Talhões'} ${[...talhoes.keys()].join(', ')} · ${formatarHa(area)}`),
+            criar('span', '', `CC ${l.CENTRO_CUSTO} · ${talhoes.size === 1 ? 'Talhão' : 'Talhões'} ${[...talhoes.keys()].join(', ')} · ${formatarHa(area)}`
+                + (emColheita.size ? ` · ${emColheita.size} em colheita` : '')),
             criar('span', 'programacao-quem', quem.length ? quem.slice(0, 2).join(', ') + (quem.length > 2 ? ` +${quem.length - 2}` : '') : '—')
         );
         linha.lastChild.title = quem.join(', ');   // o nome inteiro de todos, com o mouse em cima
@@ -205,6 +212,74 @@ function desenharResumo(nomeArquivo, avisos) {
         const lista = criar('ul', 'programacao-avisos');
         for (const a of avisos) lista.append(criar('li', '', a));
         resumo.append(criar('p', 'programacao-avisos-titulo', `⚠️ ${avisos.length === 1 ? '1 aviso' : avisos.length + ' avisos'} (dá para enviar mesmo assim):`), lista);
+    }
+}
+
+// ---------- Talhões em colheita (ordem de corte aberta) na programação que está valendo ----------
+// O líder vê, mas não consegue abrir OS neles. Quando a ordem de corte encerra, a analista marca e libera aqui.
+function desenharColheita(lista) {
+    colheita.replaceChildren();
+    colheita.hidden = lista.length === 0;
+    if (lista.length === 0) return;
+
+    const caixa = criar('div', 'programacao-colheita');
+    caixa.append(
+        criar('p', 'programacao-colheita-titulo', ` ${lista.length === 1 ? '1 talhão' : lista.length + ' talhões'} em colheita (ordem de corte aberta)`),
+        criar('p', 'programacao-colheita-dica', 'Os líderes veem, mas ainda não conseguem abrir OS neles. Quando a ordem de corte encerrar, marque e libere.')
+    );
+
+    // Um bloco por fazenda, com uma caixinha de marcar por talhão
+    const porFazenda = new Map();
+    for (const t of lista) {
+        if (!porFazenda.has(t.fa)) porFazenda.set(t.fa, { fazenda: t.fazenda, talhoes: [] });
+        porFazenda.get(t.fa).talhoes.push(t.talhao);
+    }
+    for (const [fa, { fazenda, talhoes }] of porFazenda) {
+        const bloco = criar('div', 'programacao-colheita-faz');
+        const opcoes = criar('div', 'programacao-colheita-talhoes');
+        for (const talhao of talhoes) {
+            const rotulo = criar('label', 'programacao-colheita-talhao');
+            const marcar = criar('input');
+            marcar.type = 'checkbox';
+            marcar.value = fa + '|' + talhao;
+            rotulo.append(marcar, `Talhão ${talhao}`);
+            opcoes.append(rotulo);
+        }
+        bloco.append(criar('strong', '', `${fa} · ${fazenda}`), opcoes);
+        caixa.append(bloco);
+    }
+
+    const botao = criar('button', 'botao-secundario', 'Liberar os marcados');
+    botao.type = 'button';
+    botao.disabled = true;
+    caixa.addEventListener('change', () => {
+        const n = caixa.querySelectorAll('input:checked').length;
+        botao.disabled = n === 0;
+        botao.textContent = n === 0 ? 'Liberar os marcados' : `Liberar ${n === 1 ? '1 talhão' : n + ' talhões'}`;
+    });
+    botao.addEventListener('click', () => liberar(caixa, botao));
+    caixa.append(botao);
+    colheita.append(caixa);
+}
+
+async function liberar(caixa, botao) {
+    const eu = quemSouEu();
+    const marcados = [...caixa.querySelectorAll('input:checked')].map(m => {
+        const [fa, talhao] = m.value.split('|');
+        return { fa, talhao };
+    });
+    if (!eu || marcados.length === 0) return;
+    botao.disabled = true;
+    botao.textContent = 'Liberando…';
+    erro.textContent = '';
+    try {
+        await liberarTalhoes(marcados, eu.nome);
+        mostrarAviso(`${marcados.length === 1 ? 'Talhão liberado' : marcados.length + ' talhões liberados'}. Os líderes já podem abrir OS.`);
+        await carregar();   // busca de novo: os liberados saem da lista
+    } catch (falha) {
+        erro.textContent = 'Não liberou: ' + falha.message;
+        botao.disabled = false;
+        botao.textContent = 'Liberar os marcados';
     }
 }
 

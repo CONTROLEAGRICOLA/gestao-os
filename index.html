@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/style.css?v=9">
 </head>
 
 <body>
@@ -61,7 +61,8 @@
                             <rect x="3" y="4" width="18" height="18" rx="2"></rect>
                             <path d="M16 2v4M8 2v4M3 10h18"></path>
                         </svg>
-                        <span><strong>Programação da semana</strong><small>Subir o .xlsx com as áreas programadas</small></span>
+                        <span><strong>Programação da semana</strong><small>Subir o .xlsx com as áreas
+                                programadas</small></span>
                     </button>
                 </div>
             </div>
@@ -391,6 +392,7 @@
     <dialog id="dialogo-programacao" class="dialogo dialogo-largo">
         <h2 class="dialogo-titulo">Programação da semana</h2>
         <p class="dica" id="programacao-atual"></p>
+        <div id="programacao-colheita" hidden></div>
 
         <label class="arquivo programacao-arquivo">
             <input type="file" id="programacao-arquivo" accept=".xlsx">
